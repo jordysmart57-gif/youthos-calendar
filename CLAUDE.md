@@ -3,9 +3,9 @@
 You are working on **YouthOS** (`youthos-calendar`), a youth ministry command center app.
 Tagline: **"Plan the year. Run the week. Care for the one."**
 
-> This project lives inside the Apollos Systems vault. The vault-level `CLAUDE.md` (one directory
-> up) still applies: read the vault `HANDOFF.md` at session start and write the vault daily note +
-> HANDOFF update at session end. This file adds the project-level rules.
+> This is a standalone project at `~/youthos-calendar` (it originally lived inside the Apollos
+> Systems vault and was moved out on June 10, 2026). `Handoff.md` in this folder is the single
+> source of truth for project state.
 
 ## Start of every session
 

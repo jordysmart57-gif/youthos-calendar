@@ -4,11 +4,17 @@
 
 ## Last updated
 
-**June 10, 2026, ~1:15 PM** — Session 002 (desktop version + deployment)
+**June 10, 2026, ~1:45 PM** — Session 002 (desktop version + deployment + folder move)
 
 ## Current project status
 
 🟢 **v0.1.1 live in production: https://youthos-calendar.vercel.app**
+
+📦 **Project location: `/Users/jordansmart/youthos-calendar`** — moved out of the Apollos Systems
+vault (June 10, 2026) to live as its own top-level project folder alongside Jordan's other
+projects. It now has its own `.claude/launch.json` (dev server `youthos` on port 5179), and its
+`CLAUDE.md` no longer defers to the vault. Git repo and Vercel link (`.vercel/project.json`)
+moved intact — deploys and (future) pushes work unchanged from the new path.
 
 The app now has a true desktop experience (sidebar navigation, three-column dashboard, calendar
 cells with titled event chips) alongside the original mobile layout. Build passes clean, verified
