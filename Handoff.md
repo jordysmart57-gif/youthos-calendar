@@ -4,96 +4,93 @@
 
 ## Last updated
 
-**June 10, 2026, ~12:30 PM** — Session 001 (project founding)
+**June 10, 2026, ~1:15 PM** — Session 002 (desktop version + deployment)
 
 ## Current project status
 
-🟢 **v0.1 complete and verified.** The full youth ministry command center is built, type-checks
-clean under strict TypeScript, builds successfully, and was verified running in the browser at
-desktop and mobile widths with zero console errors. All seven modules from the spec are live with
-mock data: Dashboard, Calendar, Event Command Center, People, Tasks, Parent Clarity Score, and
-Event Templates. State is in-memory only (by design for v0.1).
+🟢 **v0.1.1 live in production: https://youthos-calendar.vercel.app**
 
-## What changed (this session)
+The app now has a true desktop experience (sidebar navigation, three-column dashboard, calendar
+cells with titled event chips) alongside the original mobile layout. Build passes clean, verified
+in browser at 375px and 1440px. Deployed to Vercel production and confirmed serving (HTTP 200).
 
-Founded the entire project from scratch:
+⚠️ **One open item: GitHub push is blocked on repo creation.** The local git repo is committed,
+`origin` is set to `git@github.com:jordysmart57-gif/youthos-calendar.git`, and SSH auth to GitHub
+is verified working — but no GitHub API credential exists on this machine (no `gh` CLI, no token),
+so the remote repo couldn't be created. Jordan needs to either create an empty repo named
+`youthos-calendar` at github.com/new, or install + authenticate `gh`. Then `git push -u origin main`
+finishes the job.
 
-- **Scaffold:** Vite + React 19 + TypeScript (strict) + Tailwind CSS v4 (`@tailwindcss/vite`
-  plugin). No router or state library — plain component state, deliberately.
-- **Domain model** (`src/types.ts`): events with 8 categories, 5 lifecycle statuses, 4 operational
-  tracks (forms/payments/transportation/parent comms), volunteer needs, checklists, and the
-  10-field `ClarityInfo`; tasks in 6 ministry categories; students/parents/leaders/small groups;
-  event templates.
-- **Mock data** (`src/lib/data.ts`): 14 events (incl. all 10 requested samples plus 2 deadlines +
-  2 promo tasks), 16 tasks, 12 students, 8 parents, 7 leaders, 4 small groups, 12 templates.
-  **All dates are relative to today** via a `day(offset, hour)` helper so the demo never goes stale.
-- **Derived logic** (`src/lib/helpers.ts`): Parent Clarity Score (filled/10), volunteer gap and
-  checklist % computation, date utilities, and all category/status/track display metadata.
-- **Six views** (`src/views/`): Dashboard (stats, this week, coming up, urgent tasks, volunteer
-  gaps, clarity issues, student care), CalendarView (month grid + category filter chips + day
-  agenda), EventsView (card list + full command-center detail with interactive checklist),
-  PeopleView (6 sections), TasksView (6 categories, interactive checkboxes, overdue flags),
-  TemplatesView (12 expandable blueprints).
-- **App shell** (`src/App.tsx`): top nav pills on desktop, fixed bottom tab bar on mobile; owns
-  events/tasks state so checkbox toggles persist across tab switches; cross-view "open event"
-  navigation from dashboard and calendar.
-- **Docs:** README.md, PROJECT_SPEC.md, ROADMAP.md, Cloud.md, CLAUDE.md, this file.
+## What changed
 
-### Decisions made
+### Session 002 — June 10, 2026 (afternoon)
 
-1. **`parentFacing` flag on events** — leader meetings, deadlines, and promo tasks are excluded
-   from clarity scoring so internal items don't drag the dashboard average down.
-2. **Clarity measures communication, not logistics** — "no bus, parents drive" counts as
-   transportation info. Documented in PROJECT_SPEC.md.
-3. **Local-naive datetime strings** (`2026-06-10T19:00`, no `Z`) — avoids UTC day-shift bugs when
-   slicing date keys. `Date.toISOString()` is banned for event dates (noted in CLAUDE.md).
-4. **Deadlines and promo tasks are calendar events**, not just tasks — youth pastors plan
-   backwards from events, so they belong on the month grid with their own colors.
-5. **No router** — six tabs on one state variable keeps v0.1 simple; revisit if deep-linking is
-   ever needed.
+**Desktop version:**
+- `src/App.tsx` — new responsive shell: fixed left sidebar (logo, vertical nav, tagline) at
+  `lg+`; sticky top header with nav pills on tablet; bottom tab bar on mobile unchanged. Content
+  area widened to `max-w-7xl` with sidebar offset.
+- `src/views/Dashboard.tsx` — three-column layout at `xl` (events / tasks+gaps / clarity+care),
+  two columns at `lg`, single column mobile.
+- `src/views/CalendarView.tsx` — desktop day cells are taller (`lg:min-h-24`) and show up to 3
+  **titled event chips** in category colors with a "+n more" overflow; mobile keeps the dots.
+  Day events now sorted by time.
+- `src/views/EventsView.tsx`, `PeopleView.tsx`, `TemplatesView.tsx` — card grids go 3-up at `xl`.
+- `src/views/TasksView.tsx` — capped at `max-w-4xl` so rows don't stretch on wide screens.
 
-## Files changed
+**Deployment:**
+- Deployed to **Vercel production** via `vercel deploy --prod --yes` (CLI was already
+  authenticated as `jordysmart57-gif`). Project `youthos-calendar` auto-created, Vite detected,
+  11s build. Production alias: **https://youthos-calendar.vercel.app** — verified HTTP 200 with
+  correct title. `.vercel/` added to `.gitignore` (by the CLI).
+- Git repo initialized (`main`), initial commit includes the desktop version; `origin` remote set
+  (push pending repo creation, see status above).
 
-```
-youthos-calendar/                 (all new)
-├── package.json, tsconfig.json, vite.config.ts, index.html, .gitignore
-├── public/youthos.svg
-├── README.md, Handoff.md, Cloud.md, CLAUDE.md, PROJECT_SPEC.md, ROADMAP.md
-└── src/
-    ├── main.tsx, App.tsx, index.css, types.ts
-    ├── lib/data.ts, lib/helpers.ts
-    ├── components/ui.tsx
-    └── views/{Dashboard,CalendarView,EventsView,PeopleView,TasksView,TemplatesView}.tsx
-```
+### Session 001 — June 10, 2026 (morning) — project founded
 
-Also: `../.claude/launch.json` (vault level) — added a `youthos` dev-server config on port 5179
-(5173 was occupied by another process).
+Full v0.1 built from scratch: Vite + React 19 + TS strict + Tailwind v4 scaffold; domain model
+(`types.ts`); relative-dated mock data (14 events, 16 tasks, 12 students, 8 parents, 7 leaders,
+4 small groups, 12 templates); clarity/gap/checklist logic (`helpers.ts`); six views (Dashboard,
+Calendar, Events, People, Tasks, Templates); all docs (README, PROJECT_SPEC, ROADMAP, Cloud,
+CLAUDE, Handoff). Verified desktop + mobile in browser preview, zero console errors.
+
+Key decisions (full rationale in PROJECT_SPEC.md): `parentFacing` flag excludes internal events
+from clarity scoring; clarity measures *communication* not logistics; local-naive datetime strings
+(never `toISOString()`); deadlines/promo tasks are first-class calendar events; no router.
+
+## Files changed (session 002)
+
+- `src/App.tsx` (rewritten — sidebar shell)
+- `src/views/Dashboard.tsx` (rewritten — 3-column layout)
+- `src/views/CalendarView.tsx`, `EventsView.tsx`, `PeopleView.tsx`, `TasksView.tsx`,
+  `TemplatesView.tsx` (grid/layout edits)
+- `.gitignore` (+`.vercel`), `.vercel/project.json` (new, untracked)
+- `Handoff.md` (this update)
+- Vault-level: `../.claude/launch.json` unchanged this session (dev server still `youthos` @ 5179)
 
 ## Commands run
 
 ```bash
-npm install        # clean install, exit 0
-npm run build      # tsc strict + vite build — passed first try, 250 kB JS / 75 kB gzip
-# dev server via preview harness: npm --prefix youthos-calendar run dev -- --port 5179
+npm run build                          # passes — 252 kB JS / 75 kB gzip
+git init -b main && git add -A && git commit   # initial commit
+git remote add origin git@github.com:jordysmart57-gif/youthos-calendar.git
+git push -u origin main                # FAILED: repository not found (needs creation)
+npx vercel@latest whoami               # jordysmart57-gif (already authenticated)
+npx vercel@latest deploy --prod --yes  # → Ready, production
+curl https://youthos-calendar.vercel.app   # 200, correct <title>
 ```
-
-Verified in browser preview: dashboard (desktop), Lake Day event detail (desktop), calendar +
-bottom nav (375px mobile). Zero console errors/warnings.
 
 ## Known issues
 
-- **No persistence** — checkbox toggles reset on refresh (in-memory state; localStorage is v0.2).
-- **Templates are display-only** — "create event from template" intentionally deferred to v0.2;
-  the template cards say so.
-- Calendar day cells cap at 3 dots + a "+n" overflow count; fine at current data volume.
-- Dev server port is pinned to 5179 in `.claude/launch.json`; if that port gets taken, bump it.
+- **GitHub push pending** — see status section. Everything local is committed and ready.
+- No persistence — checkbox toggles reset on refresh (localStorage is v0.2).
+- Templates are display-only ("create from template" is v0.2).
+- Dev server port pinned to 5179 in vault `.claude/launch.json`.
 
 ## Next recommended steps
 
-1. **Create event from template** — the single best next feature. Templates already carry
-   checklist, volunteer roles, and clarity requirements; a "Use template" flow (pick date →
-   pre-filled event) turns the app from a demo into a tool overnight.
-2. **localStorage persistence** alongside it, so created events and checked boxes survive refresh
-   (both are v0.2 in ROADMAP.md and belong in the same session).
-3. After that: the v0.3 **parent update generator** — composing a parent email from an event's
-   clarity fields is the feature that makes the Parent Clarity Score earn its keep.
+1. **Finish the GitHub push** once the repo exists (`git push -u origin main`), then optionally
+   connect the repo to the Vercel project so pushes auto-deploy
+   (Vercel dashboard → Project → Settings → Git).
+2. **v0.2: create event from template + localStorage persistence** — still the best next feature
+   (templates already carry checklists, volunteer roles, and clarity requirements).
+3. Then v0.3 parent update generator (compose a parent email from an event's clarity fields).
