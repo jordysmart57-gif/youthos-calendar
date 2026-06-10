@@ -20,12 +20,10 @@ The app now has a true desktop experience (sidebar navigation, three-column dash
 cells with titled event chips) alongside the original mobile layout. Build passes clean, verified
 in browser at 375px and 1440px. Deployed to Vercel production and confirmed serving (HTTP 200).
 
-⚠️ **One open item: GitHub push is blocked on repo creation.** The local git repo is committed,
-`origin` is set to `git@github.com:jordysmart57-gif/youthos-calendar.git`, and SSH auth to GitHub
-is verified working — but no GitHub API credential exists on this machine (no `gh` CLI, no token),
-so the remote repo couldn't be created. Jordan needs to either create an empty repo named
-`youthos-calendar` at github.com/new, or install + authenticate `gh`. Then `git push -u origin main`
-finishes the job.
+✅ **On GitHub: `github.com/jordysmart57-gif/youthos-calendar`** — Jordan created the repo and
+`main` was pushed (June 10, 2026, afternoon). `origin` tracks over SSH. Note: no GitHub API
+credential exists locally (no `gh` CLI/token) — plain git push/pull works, but repo-level
+operations (PRs, settings) need the github.com UI or a future `gh auth login`.
 
 ## What changed
 
@@ -94,9 +92,9 @@ curl https://youthos-calendar.vercel.app   # 200, correct <title>
 
 ## Next recommended steps
 
-1. **Finish the GitHub push** once the repo exists (`git push -u origin main`), then optionally
-   connect the repo to the Vercel project so pushes auto-deploy
-   (Vercel dashboard → Project → Settings → Git).
+1. **Optionally connect the GitHub repo to the Vercel project** so pushes auto-deploy
+   (Vercel dashboard → youthos-calendar → Settings → Git). Until then, deploy with
+   `npx vercel deploy --prod --yes`.
 2. **v0.2: create event from template + localStorage persistence** — still the best next feature
    (templates already carry checklists, volunteer roles, and clarity requirements).
 3. Then v0.3 parent update generator (compose a parent email from an event's clarity fields).
