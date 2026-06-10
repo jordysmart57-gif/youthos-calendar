@@ -2,9 +2,11 @@ import {
   ClarityInfo,
   EventCategory,
   EventStatus,
+  EventTemplate,
   MinistryEvent,
   TaskCategory,
   TrackStatus,
+  VolunteerNeed,
 } from '../types';
 
 // ---------- Parent Clarity Score ----------
@@ -150,6 +152,70 @@ export function dueLabel(iso: string): string {
   tomorrow.setDate(tomorrow.getDate() + 1);
   if (k === keyOf(tomorrow)) return 'Tomorrow';
   return fmtDate(iso);
+}
+
+// ---------- Event creation ----------
+
+/** Order the four ops tracks cycle through when tapped. */
+export const TRACK_ORDER: TrackStatus[] = ['not-started', 'in-progress', 'complete', 'na'];
+
+export function nextTrackStatus(s: TrackStatus): TrackStatus {
+  return TRACK_ORDER[(TRACK_ORDER.indexOf(s) + 1) % TRACK_ORDER.length];
+}
+
+/** "Check-in (2)" → 2 needed; "Counselors (1 per 6 students)" → 1; no number → 1. */
+export function volunteersFromTemplate(roles: string[]): VolunteerNeed[] {
+  return roles.map((r) => {
+    const m = r.match(/^(.*?)\s*\((\d+)[^)]*\)\s*$/);
+    if (m) return { role: m[1], needed: parseInt(m[2], 10), confirmed: 0 };
+    return { role: r, needed: 1, confirmed: 0 };
+  });
+}
+
+export interface EventBase {
+  id: string;
+  title: string;
+  category: EventCategory;
+  start: string;
+  location: string;
+  targetGroup: string;
+  status: EventStatus;
+  parentFacing: boolean;
+  capacity?: number;
+  notes?: string;
+}
+
+/**
+ * Build a full event from form basics, optionally seeded by a template.
+ * Date/time clarity starts true (just chosen); template clarity fields start
+ * false (still need communicating); fields a template doesn't ask for count
+ * as covered, matching the "n/a is communicated" scoring rule.
+ */
+export function buildEvent(base: EventBase, template?: EventTemplate): MinistryEvent {
+  const clarity = {} as ClarityInfo;
+  for (const f of CLARITY_FIELDS) {
+    if (f.key === 'date' || f.key === 'time') {
+      clarity[f.key] = true;
+      continue;
+    }
+    const needsIt = template ? template.clarityFields.includes(f.key) : base.parentFacing;
+    clarity[f.key] = !needsIt;
+  }
+  const tracked = (k: keyof ClarityInfo) =>
+    template ? template.clarityFields.includes(k) : base.parentFacing;
+  return {
+    ...base,
+    registered: 0,
+    volunteers: template ? volunteersFromTemplate(template.typicalVolunteers) : [],
+    forms: tracked('forms') ? 'not-started' : 'na',
+    payments: tracked('cost') ? 'not-started' : 'na',
+    transportation: tracked('transportation') ? 'not-started' : 'na',
+    parentComm: base.parentFacing ? 'not-started' : 'na',
+    checklist: template
+      ? template.defaultChecklist.map((label, i) => ({ id: `${base.id}-${i}`, label, done: false }))
+      : [],
+    clarity,
+  };
 }
 
 export function initials(name: string): string {

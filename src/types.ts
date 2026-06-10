@@ -135,6 +135,7 @@ export interface EventTemplate {
   name: string;
   description: string;
   category: EventCategory;
+  parentFacing: boolean;
   leadTimeWeeks: number;
   defaultChecklist: string[];
   clarityFields: (keyof ClarityInfo)[];

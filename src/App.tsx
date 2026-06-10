@@ -1,6 +1,10 @@
 import { ReactNode, useState } from 'react';
-import { MinistryEvent, Task } from './types';
+import { EventTemplate, MinistryEvent, Task } from './types';
 import { EVENTS, TASKS } from './lib/data';
+import { usePersistentState } from './lib/usePersistentState';
+import { Modal } from './components/ui';
+import EventForm from './components/EventForm';
+import TaskForm from './components/TaskForm';
 import Dashboard from './views/Dashboard';
 import CalendarView from './views/CalendarView';
 import EventsView from './views/EventsView';
@@ -9,6 +13,11 @@ import TasksView from './views/TasksView';
 import TemplatesView from './views/TemplatesView';
 
 type Tab = 'dashboard' | 'calendar' | 'events' | 'people' | 'tasks' | 'templates';
+
+interface EventModalState {
+  template?: EventTemplate;
+  editId?: string;
+}
 
 function Icon({ d }: { d: string }) {
   return (
@@ -71,24 +80,49 @@ function Brand() {
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('dashboard');
-  const [events, setEvents] = useState<MinistryEvent[]>(EVENTS);
-  const [tasks, setTasks] = useState<Task[]>(TASKS);
+  const [events, setEvents] = usePersistentState<MinistryEvent[]>('youthos:v1:events', EVENTS);
+  const [tasks, setTasks] = usePersistentState<Task[]>('youthos:v1:tasks', TASKS);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [eventModal, setEventModal] = useState<EventModalState | null>(null);
+  const [taskModalOpen, setTaskModalOpen] = useState(false);
+
+  const updateEvent = (id: string, fn: (e: MinistryEvent) => MinistryEvent) =>
+    setEvents((es) => es.map((e) => (e.id === id ? fn(e) : e)));
+
+  const deleteEvent = (id: string) => {
+    setEvents((es) => es.filter((e) => e.id !== id));
+    setTasks((ts) => ts.map((t) => (t.eventId === id ? { ...t, eventId: undefined } : t)));
+    setSelectedEventId(null);
+  };
+
+  const saveEvent = (e: MinistryEvent) => {
+    if (eventModal?.editId) {
+      updateEvent(e.id, () => e);
+    } else {
+      setEvents((es) => [...es, e]);
+      setSelectedEventId(e.id);
+      setTab('events');
+    }
+    setEventModal(null);
+  };
 
   const toggleTask = (id: string) =>
     setTasks((ts) => ts.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
 
-  const toggleChecklist = (eventId: string, itemId: string) =>
-    setEvents((es) =>
-      es.map((e) =>
-        e.id === eventId
-          ? {
-              ...e,
-              checklist: e.checklist.map((c) => (c.id === itemId ? { ...c, done: !c.done } : c)),
-            }
-          : e,
-      ),
-    );
+  const deleteTask = (id: string) => setTasks((ts) => ts.filter((t) => t.id !== id));
+
+  const saveTask = (t: Task) => {
+    setTasks((ts) => [...ts, t]);
+    setTaskModalOpen(false);
+  };
+
+  const resetData = () => {
+    if (window.confirm('Reset everything back to the sample data? Your changes will be lost.')) {
+      setEvents(EVENTS);
+      setTasks(TASKS);
+      setSelectedEventId(null);
+    }
+  };
 
   const openEvent = (id: string) => {
     setSelectedEventId(id);
@@ -115,14 +149,29 @@ export default function App() {
               {t.label}
             </button>
           ))}
+          <button
+            onClick={() => setTaskModalOpen(true)}
+            className="mt-3 flex items-center gap-3 rounded-xl border border-dashed border-stone-300 px-3 py-2.5 text-sm font-bold text-stone-500 transition hover:border-brand-500 hover:text-brand-700"
+          >
+            <span className="flex h-5 w-5 items-center justify-center text-lg leading-none">+</span>
+            New task
+          </button>
         </nav>
-        <p className="px-5 py-5 text-[11px] font-semibold leading-relaxed text-stone-400">
-          Plan the year.
-          <br />
-          Run the week.
-          <br />
-          Care for the one.
-        </p>
+        <div className="px-5 py-5">
+          <button
+            onClick={resetData}
+            className="mb-3 text-[11px] font-semibold text-stone-400 underline-offset-2 transition hover:text-stone-600 hover:underline"
+          >
+            Reset sample data
+          </button>
+          <p className="text-[11px] font-semibold leading-relaxed text-stone-400">
+            Plan the year.
+            <br />
+            Run the week.
+            <br />
+            Care for the one.
+          </p>
+        </div>
       </aside>
 
       {/* Mobile / tablet header */}
@@ -157,14 +206,34 @@ export default function App() {
               events={events}
               selectedId={selectedEventId}
               onSelect={setSelectedEventId}
-              onToggleChecklist={toggleChecklist}
+              onUpdate={updateEvent}
+              onDelete={deleteEvent}
+              onEdit={(id) => setEventModal({ editId: id })}
+              onNew={() => setEventModal({})}
             />
           )}
           {tab === 'people' && <PeopleView />}
-          {tab === 'tasks' && <TasksView tasks={tasks} events={events} onToggleTask={toggleTask} />}
-          {tab === 'templates' && <TemplatesView />}
+          {tab === 'tasks' && (
+            <TasksView
+              tasks={tasks}
+              events={events}
+              onToggleTask={toggleTask}
+              onDeleteTask={deleteTask}
+              onNewTask={() => setTaskModalOpen(true)}
+            />
+          )}
+          {tab === 'templates' && <TemplatesView onUseTemplate={(t) => setEventModal({ template: t })} />}
         </main>
       </div>
+
+      {/* Mobile quick-add task */}
+      <button
+        onClick={() => setTaskModalOpen(true)}
+        aria-label="New task"
+        className="fixed bottom-20 right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-brand-600 text-2xl font-bold text-white shadow-lg transition hover:bg-brand-700 md:hidden"
+      >
+        +
+      </button>
 
       {/* Mobile bottom tab bar */}
       <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-stone-200 bg-white/95 backdrop-blur md:hidden">
@@ -181,6 +250,32 @@ export default function App() {
           </button>
         ))}
       </nav>
+
+      {eventModal && (
+        <Modal
+          title={
+            eventModal.editId
+              ? 'Edit event'
+              : eventModal.template
+                ? `New ${eventModal.template.name}`
+                : 'New event'
+          }
+          onClose={() => setEventModal(null)}
+        >
+          <EventForm
+            initial={eventModal.editId ? events.find((e) => e.id === eventModal.editId) : undefined}
+            template={eventModal.template}
+            onSave={saveEvent}
+            onClose={() => setEventModal(null)}
+          />
+        </Modal>
+      )}
+
+      {taskModalOpen && (
+        <Modal title="New task" onClose={() => setTaskModalOpen(false)}>
+          <TaskForm events={events} onSave={saveTask} onClose={() => setTaskModalOpen(false)} />
+        </Modal>
+      )}
     </div>
   );
 }

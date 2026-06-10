@@ -1,9 +1,14 @@
 import { useState } from 'react';
+import { EventTemplate } from '../types';
 import { TEMPLATES } from '../lib/data';
 import { CATEGORY_META, CLARITY_FIELDS } from '../lib/helpers';
 import { Badge, Card } from '../components/ui';
 
-export default function TemplatesView() {
+interface Props {
+  onUseTemplate: (t: EventTemplate) => void;
+}
+
+export default function TemplatesView({ onUseTemplate }: Props) {
   const [openId, setOpenId] = useState<string | null>(null);
 
   const clarityLabel = (key: string) => CLARITY_FIELDS.find((f) => f.key === key)?.label ?? key;
@@ -77,9 +82,12 @@ export default function TemplatesView() {
                       </Badge>
                     ))}
                   </div>
-                  <p className="mt-4 rounded-xl bg-stone-50 px-3 py-2 text-[11px] font-semibold text-stone-500">
-                    "Create event from template" ships in v0.2 — see ROADMAP.md.
-                  </p>
+                  <button
+                    onClick={() => onUseTemplate(t)}
+                    className="mt-4 w-full rounded-xl bg-stone-900 py-2 text-sm font-bold text-white transition hover:bg-stone-700"
+                  >
+                    Use this template →
+                  </button>
                 </div>
               )}
             </Card>

@@ -15,7 +15,11 @@ communicating with parents, scheduling volunteers, and following up with student
 | **Event Command Center** | Every event with status, registration, volunteer needs, forms / payments / transportation / parent-comms tracking, checklist progress, and a Parent Clarity Score |
 | **People** | Students, parents, leaders, new students, follow-up-needed list, small groups |
 | **Tasks** | Event prep, communication, shopping, volunteer follow-up, parent follow-up, student care |
-| **Templates** | 12 ready-to-run event blueprints (Camp, Lake Day, Tribe Night, Mission Trip, …) with default checklists and lead times |
+| **Templates** | 12 ready-to-run event blueprints (Camp, Lake Day, Tribe Night, Mission Trip, …) — one tap creates a real event with the checklist, volunteer roles, and clarity requirements seeded |
+
+Everything is editable (v0.2): create events from templates or from scratch, edit/delete them,
+add tasks from anywhere, check off checklists, tap clarity fields and ops-track statuses to
+update them, and adjust volunteer/registration counts with steppers.
 
 ### The Parent Clarity Score
 
@@ -29,9 +33,12 @@ counts as transportation info; the score measures *communication*, not logistics
 - **React 19 + TypeScript** — strict mode
 - **Vite** — dev server and build
 - **Tailwind CSS v4** — via the `@tailwindcss/vite` plugin
-- **Local mock data** — no backend, no auth, no database (yet, by design — see `ROADMAP.md`)
+- **localStorage persistence** — your edits survive refresh; no backend, no auth, no database
+  (yet, by design — see `ROADMAP.md`)
 
-Mock data is dated *relative to today*, so the dashboard always shows a live, realistic week.
+Sample data is dated *relative to today*, so the first run always shows a live, realistic week.
+Once you start editing, your data is what persists — the sidebar's "Reset sample data" button
+brings the demo dataset back (re-dated to the current week).
 
 ## Getting started
 

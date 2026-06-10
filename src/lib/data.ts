@@ -508,6 +508,7 @@ const PARENT_FACING_FIELDS: (keyof ClarityInfo)[] = [
 export const TEMPLATES: EventTemplate[] = [
   {
     id: 'tpl-weekly',
+    parentFacing: true,
     name: 'Weekly Youth Group',
     description: 'The weekly rhythm — message, worship, games, small groups.',
     category: 'high-school',
@@ -518,6 +519,7 @@ export const TEMPLATES: EventTemplate[] = [
   },
   {
     id: 'tpl-camp',
+    parentFacing: true,
     name: 'Camp',
     description: 'Multi-day overnight camp. The biggest lift of the year.',
     category: 'camps-trips',
@@ -528,6 +530,7 @@ export const TEMPLATES: EventTemplate[] = [
   },
   {
     id: 'tpl-retreat',
+    parentFacing: true,
     name: 'Retreat',
     description: 'Weekend getaway — lighter than camp, same parent-info needs.',
     category: 'camps-trips',
@@ -538,6 +541,7 @@ export const TEMPLATES: EventTemplate[] = [
   },
   {
     id: 'tpl-lake-day',
+    parentFacing: true,
     name: 'Lake Day',
     description: 'Single-day water event. Waivers and supervision are the big rocks.',
     category: 'camps-trips',
@@ -548,6 +552,7 @@ export const TEMPLATES: EventTemplate[] = [
   },
   {
     id: 'tpl-parent-meeting',
+    parentFacing: true,
     name: 'Parent Meeting',
     description: 'Info night for parents — slides, FAQ handout, childcare.',
     category: 'parents',
@@ -558,6 +563,7 @@ export const TEMPLATES: EventTemplate[] = [
   },
   {
     id: 'tpl-leader-meeting',
+    parentFacing: false,
     name: 'Leader Meeting',
     description: 'Vision, calendar, and care for your volunteer team.',
     category: 'leaders',
@@ -568,6 +574,7 @@ export const TEMPLATES: EventTemplate[] = [
   },
   {
     id: 'tpl-service-project',
+    parentFacing: true,
     name: 'Service Project',
     description: 'Hands-on serve day with a local partner organization.',
     category: 'high-school',
@@ -578,6 +585,7 @@ export const TEMPLATES: EventTemplate[] = [
   },
   {
     id: 'tpl-fundraiser',
+    parentFacing: true,
     name: 'Fundraiser',
     description: 'Raise money for camp or missions — clear goal, clear ask.',
     category: 'promo',
@@ -588,6 +596,7 @@ export const TEMPLATES: EventTemplate[] = [
   },
   {
     id: 'tpl-tribe-night',
+    parentFacing: true,
     name: 'Tribe Night',
     description: 'High-energy competition night. Bring-a-friend culture builder.',
     category: 'high-school',
@@ -598,6 +607,7 @@ export const TEMPLATES: EventTemplate[] = [
   },
   {
     id: 'tpl-bible-study',
+    parentFacing: false,
     name: 'Bible Study',
     description: 'Recurring deep-dive study, usually off-campus.',
     category: 'bible-study',
@@ -608,6 +618,7 @@ export const TEMPLATES: EventTemplate[] = [
   },
   {
     id: 'tpl-mission-trip',
+    parentFacing: true,
     name: 'Mission Trip',
     description: 'The longest runway in youth ministry — passports, funds, training.',
     category: 'camps-trips',
@@ -618,6 +629,7 @@ export const TEMPLATES: EventTemplate[] = [
   },
   {
     id: 'tpl-graduation',
+    parentFacing: true,
     name: 'Graduation Night',
     description: 'Honor the seniors — slideshow, blessings, send-off.',
     category: 'high-school',

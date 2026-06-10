@@ -2,7 +2,7 @@
 
 Each version must leave the app runnable and demoable. Ship small, keep it working.
 
-## ✅ v0.1 — The Command Center (current)
+## ✅ v0.1 — The Command Center
 
 Mock-data dashboard that feels like a real youth ministry operating system.
 
@@ -14,15 +14,17 @@ Mock-data dashboard that feels like a real youth ministry operating system.
 - 12 event templates with checklists + lead times
 - Relative-dated mock data so the demo never goes stale
 
-## v0.2 — Make It Editable
+## ✅ v0.2 — Make It Editable (current)
 
 The jump from demo to tool.
 
-- **Create event from template** (the #1 next feature — templates already carry the data)
-- Add/edit/delete events, tasks, and checklist items
-- Edit clarity fields per event (tap a missing field to mark it communicated)
-- **localStorage persistence** so the app remembers between sessions
-- Quick-add task from anywhere
+- ✅ **Create event from template** — pick a template, get a prefilled form (date defaults to the
+  template's lead time), checklist + volunteer roles + clarity requirements seeded automatically
+- ✅ Add/edit/delete events; add/delete tasks; add/remove/toggle checklist items
+- ✅ Edit clarity fields per event (tap a field to mark it communicated) and tap-to-cycle the four
+  ops tracks; steppers for registration count and volunteer confirmations; add/remove volunteer roles
+- ✅ **localStorage persistence** (`youthos:v1:*` keys) with a "Reset sample data" escape hatch
+- ✅ Quick-add task from anywhere (sidebar button on desktop, floating button on mobile)
 
 ## v0.3 — Communicate
 

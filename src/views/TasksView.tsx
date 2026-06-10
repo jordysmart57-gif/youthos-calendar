@@ -13,6 +13,8 @@ interface Props {
   tasks: Task[];
   events: MinistryEvent[];
   onToggleTask: (id: string) => void;
+  onDeleteTask: (id: string) => void;
+  onNewTask: () => void;
 }
 
 const PRIORITY_TONE = {
@@ -25,14 +27,16 @@ function TaskRow({
   t,
   eventTitle,
   onToggle,
+  onDelete,
 }: {
   t: Task;
   eventTitle?: string;
   onToggle: (id: string) => void;
+  onDelete: (id: string) => void;
 }) {
   const overdue = !t.done && dateKey(t.due) < todayKey();
   return (
-    <label className="flex cursor-pointer items-start gap-3 rounded-xl px-2 py-2 transition hover:bg-stone-50">
+    <label className="group flex cursor-pointer items-start gap-3 rounded-xl px-2 py-2 transition hover:bg-stone-50">
       <input
         type="checkbox"
         checked={t.done}
@@ -52,11 +56,22 @@ function TaskRow({
           {eventTitle && <Badge tone="bg-brand-50 text-brand-700">{eventTitle}</Badge>}
         </div>
       </div>
+      <button
+        type="button"
+        onClick={(ev) => {
+          ev.preventDefault();
+          onDelete(t.id);
+        }}
+        aria-label={`Delete ${t.title}`}
+        className="mt-0.5 text-stone-300 transition hover:text-rose-500"
+      >
+        ✕
+      </button>
     </label>
   );
 }
 
-export default function TasksView({ tasks, events, onToggleTask }: Props) {
+export default function TasksView({ tasks, events, onToggleTask, onDeleteTask, onNewTask }: Props) {
   const [catFilter, setCatFilter] = useState<TaskCategory | 'all'>('all');
 
   const eventTitle = (id?: string) => events.find((e) => e.id === id)?.title;
@@ -68,9 +83,17 @@ export default function TasksView({ tasks, events, onToggleTask }: Props) {
 
   return (
     <div className="max-w-4xl space-y-5">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-extrabold tracking-tight">Tasks</h1>
-        <p className="text-sm font-semibold text-stone-500">{openCount} open</p>
+        <div className="flex items-center gap-3">
+          <p className="text-sm font-semibold text-stone-500">{openCount} open</p>
+          <button
+            onClick={onNewTask}
+            className="rounded-full bg-stone-900 px-4 py-2 text-sm font-bold text-white transition hover:bg-stone-700"
+          >
+            + New task
+          </button>
+        </div>
       </div>
 
       <div className="flex gap-2 overflow-x-auto pb-1">
@@ -102,7 +125,7 @@ export default function TasksView({ tasks, events, onToggleTask }: Props) {
                 </SectionTitle>
                 <Card className="!p-2">
                   {catTasks.map((t) => (
-                    <TaskRow key={t.id} t={t} eventTitle={eventTitle(t.eventId)} onToggle={onToggleTask} />
+                    <TaskRow key={t.id} t={t} eventTitle={eventTitle(t.eventId)} onToggle={onToggleTask} onDelete={onDeleteTask} />
                   ))}
                 </Card>
               </section>
@@ -114,7 +137,7 @@ export default function TasksView({ tasks, events, onToggleTask }: Props) {
               <SectionTitle>Completed</SectionTitle>
               <Card className="!p-2 opacity-75">
                 {done.map((t) => (
-                  <TaskRow key={t.id} t={t} eventTitle={eventTitle(t.eventId)} onToggle={onToggleTask} />
+                  <TaskRow key={t.id} t={t} eventTitle={eventTitle(t.eventId)} onToggle={onToggleTask} onDelete={onDeleteTask} />
                 ))}
               </Card>
             </section>

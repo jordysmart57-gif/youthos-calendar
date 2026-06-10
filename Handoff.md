@@ -4,11 +4,17 @@
 
 ## Last updated
 
-**June 10, 2026, ~1:45 PM** — Session 002 (desktop version + deployment + folder move)
+**June 10, 2026, ~2:45 PM** — Session 003 (v0.2: editable + persistent)
 
 ## Current project status
 
-🟢 **v0.1.1 live in production: https://youthos-calendar.vercel.app**
+🟢 **v0.2.0 live in production: https://youthos-calendar.vercel.app**
+
+The app is now a real tool, not just a demo: events can be created from templates (or scratch),
+edited, and deleted; tasks can be quick-added from anywhere and deleted; checklists, clarity
+fields, ops tracks, volunteer counts, and registration are all editable in place; and everything
+persists in localStorage between sessions. Browser-verified end-to-end (template → event →
+clarity toggle → task add → hard reload), zero console errors.
 
 📦 **Project location: `/Users/jordansmart/youthos-calendar`** — moved out of the Apollos Systems
 vault (June 10, 2026) to live as its own top-level project folder alongside Jordan's other
@@ -26,6 +32,40 @@ credential exists locally (no `gh` CLI/token) — plain git push/pull works, but
 operations (PRs, settings) need the github.com UI or a future `gh auth login`.
 
 ## What changed
+
+### Session 003 — June 10, 2026 (v0.2)
+
+**New capability — create event from template:** "Use this template →" on any template card opens
+a prefilled form (date defaults to today + the template's lead time). `buildEvent()` in
+`helpers.ts` seeds the checklist, parses volunteer roles from the template strings ("Drivers
+(6–10)" → 6 needed), and derives clarity: date/time start true (just chosen), the template's
+required fields start false, everything else counts as covered per the n/a rule. Ops tracks
+(forms/payments/transportation/parent comms) default to not-started or n/a based on what the
+template asks parents for.
+
+**Everything is editable now:**
+- Events: create blank ("+ New event"), edit basics (Edit button → same form), delete (confirm).
+- Event detail: tap clarity fields to toggle, tap ops-track pills to cycle status, +/− steppers
+  on registration and volunteer confirmations, add/remove volunteer roles, add/remove/toggle
+  checklist items.
+- Tasks: quick-add from the sidebar (desktop) or floating + button (mobile) or Tasks view;
+  delete via ✕ on any row. Deleting an event unlinks its tasks rather than deleting them.
+
+**Persistence:** `usePersistentState` hook (new `src/lib/usePersistentState.ts`) backs events and
+tasks with localStorage (`youthos:v1:events` / `youthos:v1:tasks`), falling back gracefully when
+storage is unavailable. **Tradeoff:** once persisted, sample data keeps its absolute dates and
+will drift from "today" — the sidebar's "Reset sample data" button restores a fresh relative-dated
+dataset. Documented in README.
+
+**New/changed files:** `components/EventForm.tsx` + `TaskForm.tsx` (new), `lib/usePersistentState.ts`
+(new), `Modal`/`Field`/`inputCls` added to `components/ui.tsx`, `buildEvent`/`volunteersFromTemplate`/
+`nextTrackStatus` added to `lib/helpers.ts`, `parentFacing` added to templates (types + data),
+App.tsx rewired (persistence, modals, quick-add, reset), EventsView rewritten (interactive detail),
+TasksView (delete + new-task button), TemplatesView (use-template button). Version bumped to 0.2.0;
+README + ROADMAP updated.
+
+**Commands run:** `npm run build` (passes), browser verification via dev server on :5179,
+`vercel deploy --prod`, git commit + push.
 
 ### Session 002 — June 10, 2026 (afternoon)
 
@@ -85,16 +125,19 @@ curl https://youthos-calendar.vercel.app   # 200, correct <title>
 
 ## Known issues
 
-- **GitHub push pending** — see status section. Everything local is committed and ready.
-- No persistence — checkbox toggles reset on refresh (localStorage is v0.2).
-- Templates are display-only ("create from template" is v0.2).
-- Dev server port pinned to 5179 in vault `.claude/launch.json`.
+- **Sample-data drift after first persist** — by design; "Reset sample data" (sidebar) restores a
+  relative-dated demo set. Real user-created events are unaffected.
+- Volunteer "needed" counts aren't editable after creation (only confirmed) — remove + re-add the
+  role as a workaround; proper edit is a v0.4 nicety.
+- People layer is still read-only mock data (students/parents/leaders editing isn't scoped until
+  v0.4 attendance work).
+- Live site is on Vercel's default URL; custom domain undecided.
 
 ## Next recommended steps
 
-1. **Optionally connect the GitHub repo to the Vercel project** so pushes auto-deploy
-   (Vercel dashboard → youthos-calendar → Settings → Git). Until then, deploy with
-   `npx vercel deploy --prod --yes`.
-2. **v0.2: create event from template + localStorage persistence** — still the best next feature
-   (templates already carry checklists, volunteer roles, and clarity requirements).
-3. Then v0.3 parent update generator (compose a parent email from an event's clarity fields).
+1. **v0.3 — the parent update generator**: compose a parent email/text draft straight from an
+   event's clarity fields (the missing-field list becomes the editing checklist). This is the
+   feature that makes the Parent Clarity Score earn its keep, and all the data is now in place.
+2. The v0.3 **leader briefing generator** (one-page run sheet per event) pairs naturally with it.
+3. Housekeeping: connect the GitHub repo to the Vercel project for auto-deploys
+   (dashboard → Settings → Git); until then `npx vercel deploy --prod --yes` after pushes.
