@@ -63,18 +63,18 @@ export default function SettingsModal({ onExport, onImport, onReset, onClose }: 
         </div>
 
         <div className="border-t border-stone-100 pt-4">
-          <p className="text-sm font-bold">Start over</p>
+          <p className="text-sm font-bold">Clear all data</p>
           <p className="mt-0.5 text-xs text-stone-500">
-            Replaces everything with a fresh sample dataset dated around today.
+            Removes every event, task, and person. Use this to start fresh. Back up first if you want to keep anything.
           </p>
           <button
             onClick={() => {
               onReset();
-              setStatus({ ok: true, msg: 'Sample data restored.' });
+              setStatus({ ok: true, msg: 'All data cleared.' });
             }}
             className="mt-2 rounded-full border border-rose-200 px-4 py-2 text-sm font-bold text-rose-600 transition hover:border-rose-400"
           >
-            Reset to sample data
+            Clear all data
           </button>
         </div>
 

@@ -170,13 +170,13 @@ export default function App() {
   };
 
   const resetData = () => {
-    if (!window.confirm('Reset everything back to the sample data? Your changes will be lost.')) return;
-    setEvents(EVENTS);
-    setTasks(TASKS);
-    setStudents(STUDENTS);
-    setParents(PARENTS);
-    setLeaders(LEADERS);
-    setGroups(SMALL_GROUPS);
+    if (!window.confirm("Clear all data? Every event, task, and person will be removed. This can't be undone.")) return;
+    setEvents([]);
+    setTasks([]);
+    setStudents([]);
+    setParents([]);
+    setLeaders([]);
+    setGroups([]);
     setSelectedEventId(null);
   };
 

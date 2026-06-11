@@ -108,42 +108,61 @@ function TrackPill({
   );
 }
 
-function EventCard({ e, onSelect }: { e: MinistryEvent; onSelect: (id: string) => void }) {
+function EventCard({
+  e,
+  onSelect,
+  onDelete,
+}: {
+  e: MinistryEvent;
+  onSelect: (id: string) => void;
+  onDelete: (id: string) => void;
+}) {
   const cat = CATEGORY_META[e.category];
   const gap = volunteerGap(e);
   const pct = checklistPct(e);
   const score = clarityScore(e);
   return (
     <Card className="!p-0">
-      <button onClick={() => onSelect(e.id)} className="block w-full p-4 text-left">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <p className="truncate text-base font-extrabold">{e.title}</p>
-            <p className="mt-0.5 text-xs text-stone-500">
-              {fmtDate(e.start)} · {fmtTime(e.start)}{e.location ? ` · ${e.location}` : ''}
-            </p>
+      <div className="relative">
+        <button onClick={() => onSelect(e.id)} className="block w-full p-4 pr-10 text-left">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="truncate text-base font-extrabold">{e.title}</p>
+              <p className="mt-0.5 text-xs text-stone-500">
+                {fmtDate(e.start)} · {fmtTime(e.start)}{e.location ? ` · ${e.location}` : ''}
+              </p>
+            </div>
+            <Badge tone={STATUS_META[e.status].chip}>{STATUS_META[e.status].label}</Badge>
           </div>
-          <Badge tone={STATUS_META[e.status].chip}>{STATUS_META[e.status].label}</Badge>
-        </div>
-        <div className="mt-2 flex flex-wrap items-center gap-1.5">
-          <Badge tone={cat.chip}>{cat.label}</Badge>
-          {e.capacity ? (
-            <Badge tone="bg-stone-100 text-stone-600">
-              {e.registered}/{e.capacity} registered
-            </Badge>
-          ) : (
-            e.registered > 0 && <Badge tone="bg-stone-100 text-stone-600">{e.registered} expected</Badge>
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            <Badge tone={cat.chip}>{cat.label}</Badge>
+            {e.capacity ? (
+              <Badge tone="bg-stone-100 text-stone-600">
+                {e.registered}/{e.capacity} registered
+              </Badge>
+            ) : (
+              e.registered > 0 && <Badge tone="bg-stone-100 text-stone-600">{e.registered} expected</Badge>
+            )}
+            {gap > 0 && <Badge tone="bg-amber-100 text-amber-800">{gap} volunteers needed</Badge>}
+            {e.parentFacing && <Badge tone={clarityTone(score).chip}>Clarity {score}%</Badge>}
+          </div>
+          {e.checklist.length > 0 && (
+            <div className="mt-3 flex items-center gap-2">
+              <ProgressBar value={pct} className="flex-1" />
+              <span className="text-[11px] font-bold text-stone-500">{pct}%</span>
+            </div>
           )}
-          {gap > 0 && <Badge tone="bg-amber-100 text-amber-800">{gap} volunteers needed</Badge>}
-          {e.parentFacing && <Badge tone={clarityTone(score).chip}>Clarity {score}%</Badge>}
-        </div>
-        {e.checklist.length > 0 && (
-          <div className="mt-3 flex items-center gap-2">
-            <ProgressBar value={pct} className="flex-1" />
-            <span className="text-[11px] font-bold text-stone-500">{pct}%</span>
-          </div>
-        )}
-      </button>
+        </button>
+        <button
+          onClick={() => {
+            if (window.confirm(`Delete "${e.title}"? This can't be undone.`)) onDelete(e.id);
+          }}
+          aria-label={`Delete ${e.title}`}
+          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full text-stone-300 transition hover:bg-rose-50 hover:text-rose-500"
+        >
+          ✕
+        </button>
+      </div>
     </Card>
   );
 }
@@ -635,7 +654,7 @@ export default function EventsView({ events, selectedId, onSelect, onUpdate, onD
       ) : (
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((e) => (
-            <EventCard key={e.id} e={e} onSelect={onSelect} />
+            <EventCard key={e.id} e={e} onSelect={onSelect} onDelete={onDelete} />
           ))}
         </div>
       )}
