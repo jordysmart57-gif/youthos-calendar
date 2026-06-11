@@ -11,7 +11,7 @@ import {
   startOfWeek,
   todayKey,
 } from '../lib/helpers';
-import { Badge, Card, Chip, EmptyState, SectionTitle } from '../components/ui';
+import { Badge, Card, Chip, EmptyState, PageTitle, SectionTitle } from '../components/ui';
 
 interface Props {
   events: MinistryEvent[];
@@ -69,7 +69,7 @@ export default function CalendarView({ events, onOpenEvent, onNewEvent }: Props)
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-extrabold tracking-tight">Calendar</h1>
+        <PageTitle>Calendar</PageTitle>
         <div className="flex items-center gap-1">
           <button
             onClick={() => moveMonth(-1)}

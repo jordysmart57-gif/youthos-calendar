@@ -7,7 +7,7 @@ import {
   dueLabel,
   todayKey,
 } from '../lib/helpers';
-import { Badge, Card, Chip, EmptyState, SectionTitle } from '../components/ui';
+import { Badge, Card, Chip, EmptyState, PageTitle, SectionTitle } from '../components/ui';
 
 interface Props {
   tasks: Task[];
@@ -84,7 +84,7 @@ export default function TasksView({ tasks, events, onToggleTask, onDeleteTask, o
   return (
     <div className="max-w-4xl space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-extrabold tracking-tight">Tasks</h1>
+        <PageTitle>Tasks</PageTitle>
         <div className="flex items-center gap-3">
           <p className="text-sm font-semibold text-stone-500">{openCount} open</p>
           <button

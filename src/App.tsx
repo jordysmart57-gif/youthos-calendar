@@ -71,11 +71,11 @@ const TABS: { id: Tab; label: string; icon: ReactNode }[] = [
 function Brand() {
   return (
     <>
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-base font-extrabold text-white shadow-sm">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 font-display text-lg font-semibold text-white shadow-glow ring-1 ring-white/30">
         Y
       </div>
       <div className="min-w-0">
-        <h1 className="text-base font-extrabold leading-tight tracking-tight">YouthOS</h1>
+        <h1 className="font-display text-lg font-semibold leading-tight tracking-tight">YouthOS</h1>
         <p className="truncate text-[11px] font-medium leading-tight text-stone-500">
           Youth ministry command center
         </p>
@@ -183,8 +183,8 @@ export default function App() {
   return (
     <div className="min-h-screen">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-stone-200/80 bg-white/70 backdrop-blur lg:flex">
-        <div className="flex items-center gap-3 px-5 pb-4 pt-6">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-stone-200/70 bg-white/60 backdrop-blur-xl lg:flex">
+        <div className="flex items-center gap-3 px-5 pb-5 pt-6">
           <Brand />
         </div>
         <nav className="flex flex-1 flex-col gap-1 px-3 pt-2">
@@ -192,17 +192,21 @@ export default function App() {
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition ${
-                tab === t.id ? 'bg-stone-900 text-white' : 'text-stone-600 hover:bg-stone-200/60'
+              className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition active:scale-[0.98] ${
+                tab === t.id
+                  ? 'bg-stone-900 text-white shadow-soft'
+                  : 'text-stone-600 hover:bg-white hover:text-ink'
               }`}
             >
-              {t.icon}
+              <span className={tab === t.id ? 'text-brand-200' : 'text-stone-400 group-hover:text-brand-600'}>
+                {t.icon}
+              </span>
               {t.label}
             </button>
           ))}
           <button
             onClick={() => setTaskModalOpen(true)}
-            className="mt-3 flex items-center gap-3 rounded-xl border border-dashed border-stone-300 px-3 py-2.5 text-sm font-bold text-stone-500 transition hover:border-brand-500 hover:text-brand-700"
+            className="mt-3 flex items-center gap-3 rounded-xl border border-dashed border-stone-300 px-3 py-2.5 text-sm font-bold text-stone-500 transition hover:border-brand-500 hover:text-brand-700 active:scale-[0.98]"
           >
             <span className="flex h-5 w-5 items-center justify-center text-lg leading-none">+</span>
             New task
@@ -211,13 +215,13 @@ export default function App() {
         <div className="px-3 pb-3">
           <button
             onClick={() => setSettingsOpen(true)}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-stone-500 transition hover:bg-stone-200/60"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-stone-500 transition hover:bg-white hover:text-ink active:scale-[0.98]"
           >
             <Icon d={SETTINGS_ICON} />
             Data & settings
           </button>
         </div>
-        <p className="px-5 pb-5 text-[11px] font-semibold leading-relaxed text-stone-400">
+        <p className="font-display px-5 pb-6 text-[13px] font-medium italic leading-relaxed text-stone-400">
           Plan the year.
           <br />
           Run the week.
@@ -227,16 +231,16 @@ export default function App() {
       </aside>
 
       {/* Mobile / tablet header */}
-      <header className="sticky top-0 z-30 border-b border-stone-200/80 bg-cream/90 backdrop-blur lg:hidden">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
+      <header className="safe-top sticky top-0 z-30 border-b border-stone-200/70 bg-cream/80 backdrop-blur-xl lg:hidden">
+        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 safe-x">
           <Brand />
-          <nav className="ml-auto hidden items-center gap-1 md:flex">
+          <nav className="scroll-rail ml-auto hidden items-center gap-1 md:flex">
             {TABS.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition ${
-                  tab === t.id ? 'bg-stone-900 text-white' : 'text-stone-600 hover:bg-stone-200/60'
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition active:scale-95 ${
+                  tab === t.id ? 'bg-stone-900 text-white shadow-soft' : 'text-stone-600 hover:bg-white'
                 }`}
               >
                 {t.icon}
@@ -247,7 +251,7 @@ export default function App() {
           <button
             onClick={() => setSettingsOpen(true)}
             aria-label="Data & settings"
-            className="ml-auto flex h-9 w-9 items-center justify-center rounded-full text-stone-500 transition hover:bg-stone-200/60 md:ml-1"
+            className="ml-auto flex h-10 w-10 items-center justify-center rounded-full text-stone-500 transition hover:bg-white active:scale-90 md:ml-1"
           >
             <Icon d={SETTINGS_ICON} />
           </button>
@@ -255,7 +259,8 @@ export default function App() {
       </header>
 
       <div className="lg:pl-60">
-        <main className="mx-auto max-w-7xl px-4 py-6 pb-24 md:pb-12 lg:px-8 lg:py-8">
+        <main className="safe-x mx-auto max-w-7xl px-4 py-6 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-12 lg:px-8 lg:py-8">
+          <div key={tab} className="animate-fade-up">
           {tab === 'dashboard' && (
             <Dashboard
               events={events}
@@ -306,6 +311,7 @@ export default function App() {
             />
           )}
           {tab === 'templates' && <TemplatesView onUseTemplate={(t) => setEventModal({ template: t })} />}
+          </div>
         </main>
       </div>
 
@@ -313,25 +319,33 @@ export default function App() {
       <button
         onClick={() => setTaskModalOpen(true)}
         aria-label="New task"
-        className="fixed bottom-20 right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-brand-600 text-2xl font-bold text-white shadow-lg transition hover:bg-brand-700 md:hidden"
+        className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-30 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-3xl font-light leading-none text-white shadow-glow transition hover:from-brand-600 hover:to-brand-700 active:scale-90 md:hidden"
       >
         +
       </button>
 
       {/* Mobile bottom tab bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-stone-200 bg-white/95 backdrop-blur md:hidden">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`flex flex-col items-center gap-0.5 py-2 text-[10px] font-semibold ${
-              tab === t.id ? 'text-brand-700' : 'text-stone-400'
-            }`}
-          >
-            {t.icon}
-            {t.label}
-          </button>
-        ))}
+      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-stone-200/70 bg-white/85 backdrop-blur-xl md:hidden">
+        {TABS.map((t) => {
+          const active = tab === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`relative flex flex-col items-center gap-0.5 pb-1.5 pt-2.5 text-[10px] font-bold transition active:scale-90 ${
+                active ? 'text-brand-700' : 'text-stone-400'
+              }`}
+            >
+              {active && (
+                <span className="absolute top-0 h-1 w-8 rounded-full bg-brand-500" />
+              )}
+              <span className={active ? 'scale-110 transition-transform' : 'transition-transform'}>
+                {t.icon}
+              </span>
+              {t.label}
+            </button>
+          );
+        })}
       </nav>
 
       {eventModal && (

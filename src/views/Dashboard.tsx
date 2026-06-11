@@ -13,7 +13,7 @@ import {
   dateKey,
   todayKey,
 } from '../lib/helpers';
-import { Avatar, Badge, Card, EmptyState, SectionTitle } from '../components/ui';
+import { Avatar, Badge, Card, EmptyState, PageTitle, SectionTitle } from '../components/ui';
 
 interface Props {
   events: MinistryEvent[];
@@ -97,15 +97,21 @@ export default function Dashboard({ events, tasks, students, onToggleTask, onOpe
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-xs font-bold uppercase tracking-wider text-brand-600">{todayLong}</p>
-        <h1 className="mt-1 text-2xl font-extrabold tracking-tight">This Week in Youth Ministry</h1>
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-brand-600">{todayLong}</p>
+        <PageTitle className="mt-1 !text-[2rem]">This Week in Youth Ministry</PageTitle>
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {stats.map((s) => (
-          <Card key={s.label} className="!p-3 lg:!p-4">
-            <p className="text-2xl font-extrabold tracking-tight">{s.value}</p>
-            <p className="mt-0.5 text-xs font-semibold text-stone-500">{s.label}</p>
+        {stats.map((s, i) => (
+          <Card
+            key={s.label}
+            className="animate-pop !p-3.5 lg:!p-4"
+            style={{ animationDelay: `${i * 60}ms` }}
+          >
+            <p className="font-display text-[2rem] font-semibold leading-none tracking-tight text-ink">
+              {s.value}
+            </p>
+            <p className="mt-1.5 text-xs font-semibold text-stone-500">{s.label}</p>
           </Card>
         ))}
       </div>

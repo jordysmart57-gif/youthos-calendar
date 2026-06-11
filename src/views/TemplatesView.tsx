@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { EventTemplate } from '../types';
 import { TEMPLATES } from '../lib/data';
 import { CATEGORY_META, CLARITY_FIELDS } from '../lib/helpers';
-import { Badge, Card } from '../components/ui';
+import { Badge, Card, PageTitle } from '../components/ui';
 
 interface Props {
   onUseTemplate: (t: EventTemplate) => void;
@@ -16,7 +16,7 @@ export default function TemplatesView({ onUseTemplate }: Props) {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-extrabold tracking-tight">Event Templates</h1>
+        <PageTitle>Event Templates</PageTitle>
         <p className="mt-1 text-sm text-stone-600">
           Every event type you run in a year — with its checklist, lead time, and volunteer needs
           already thought through. Tap one to see what's inside.

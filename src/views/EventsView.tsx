@@ -19,7 +19,7 @@ import {
   nextTrackStatus,
   volunteerGap,
 } from '../lib/helpers';
-import { Badge, Card, Chip, EmptyState, Modal, ProgressBar, SectionTitle } from '../components/ui';
+import { Badge, Card, Chip, EmptyState, Modal, PageTitle, ProgressBar, SectionTitle } from '../components/ui';
 
 type ClarityKey = keyof ClarityInfo;
 
@@ -268,7 +268,7 @@ function EventDetail({
 
       <div>
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-extrabold tracking-tight">{e.title}</h1>
+          <PageTitle>{e.title}</PageTitle>
           <Badge tone={STATUS_META[e.status].chip}>{STATUS_META[e.status].label}</Badge>
           <Badge tone={cat.chip}>{cat.label}</Badge>
         </div>
@@ -629,7 +629,7 @@ export default function EventsView({ events, selectedId, onSelect, onUpdate, onD
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-extrabold tracking-tight">Event Command Center</h1>
+        <PageTitle>Event Command Center</PageTitle>
         <button
           onClick={onNew}
           className="rounded-full bg-stone-900 px-4 py-2 text-sm font-bold text-white transition hover:bg-stone-700"

@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useState } from 'react';
 import { Leader, Parent, SmallGroup, Student } from '../types';
-import { Avatar, Badge, Card, Chip, EmptyState, Modal, SectionTitle } from '../components/ui';
+import { Avatar, Badge, Card, Chip, EmptyState, Modal, PageTitle, SectionTitle } from '../components/ui';
 import { GroupForm, LeaderForm, ParentForm, StudentForm } from '../components/PeopleForms';
 
 type Section = 'students' | 'parents' | 'leaders' | 'new' | 'follow-up' | 'groups';
@@ -237,7 +237,7 @@ export default function PeopleView({
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-extrabold tracking-tight">People</h1>
+        <PageTitle>People</PageTitle>
         <button
           onClick={() => setModal({ type: add.type })}
           className="rounded-full bg-stone-900 px-4 py-2 text-sm font-bold text-white transition hover:bg-stone-700"
