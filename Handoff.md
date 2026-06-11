@@ -4,7 +4,48 @@
 
 ## Last updated
 
-**June 11, 2026** — Session 005 (mobile optimization + design elevation)
+**June 11, 2026** — Session 006 (cloud sync: Supabase auth + cross-device)
+
+### Session 006 — June 11, 2026 (cloud sync)
+
+Cross-device sync shipped. Data now lives in the cloud per-account and stays in
+sync between phone and computer, with localStorage kept as an offline mirror.
+
+- **Supabase project:** using the existing **`youthpulse`** project
+  (id `gsgwhagsgxyztpmrphqg`, org `artaalmjtqevvyesvgoo`). A dedicated `youthos`
+  project couldn't be created — the free plan caps at 2 active projects and both
+  slots are taken (`Modern Monk`, `youthpulse`). Added one **namespaced** table,
+  `public.youthos_workspaces` (additive — does not touch the other app's
+  `churches`/`oauth_tokens`/`configurations`/`brief_history` tables).
+- **Schema:** one row per user — `user_id` (PK → auth.users) + a JSONB column per
+  collection (events/tasks/students/parents/leaders/groups) + `updated_at`. RLS:
+  each user can only select/insert/update their own row. Table added to the
+  `supabase_realtime` publication for live updates.
+- **Code:** `src/lib/supabase.ts` (client; URL + publishable key embedded as safe
+  defaults, env-overridable), `useSession.ts` (auth state), `useCloudWorkspace.ts`
+  (the synced store — instant seed from cache, sign-in adopts cloud or migrates
+  local up if cloud empty, debounced upserts, realtime apply with echo-guard via
+  `updated_at`), `components/AuthScreen.tsx` (email+password sign-in/create).
+  `App.tsx` split into an auth gate + `Workspace`. SettingsModal gained an Account
+  section (email, sync status, **Sign out**). Sync badge (Synced/Saving/Offline)
+  in sidebar + mobile header.
+- **Auth model:** email + password (chosen over magic link — instant, no reliance
+  on flaky free-tier email). `@supabase/supabase-js` added.
+- **⚠️ Setup step owned by Jordan:** email confirmation was ON
+  (`mailer_autoconfirm:false`). Jordan opted to turn it OFF for now (single user).
+  Toggle: Supabase dashboard → project `youthpulse` → Authentication → Providers →
+  Email → uncheck **Confirm email** → Save. (Direct: dashboard/project/
+  gsgwhagsgxyztpmrphqg/auth/providers.) Then signup logs straight in. Re-enable
+  with a real SMTP (e.g. Resend) before onboarding outside users.
+  - I attempted to pre-provision Jordan's confirmed account via SQL; the auto-mode
+    safety classifier (correctly) blocked direct writes to `auth.users`. Not retried.
+- **Migration note:** on first sign-in, sign in **first on the device that already
+  has your data** so it pushes up to the cloud; other devices then pull it down.
+- Verified: build passes; AuthScreen renders clean on mobile (375px). Full
+  end-to-end cloud round-trip not yet verified (needs Jordan's real account).
+- Bundle grew to ~497 kB / 139 kB gzip (Supabase client).
+
+### Session 005 — June 11, 2026 (mobile optimization + design elevation)
 
 ### Session 005 — June 11, 2026 (design + mobile)
 
