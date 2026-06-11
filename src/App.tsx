@@ -1,10 +1,12 @@
 import { ReactNode, useState } from 'react';
-import { EventTemplate, Leader, MinistryEvent, Parent, SmallGroup, Student, Task } from './types';
-import { EVENTS, LEADERS, PARENTS, SMALL_GROUPS, STUDENTS, TASKS } from './lib/data';
-import { usePersistentState } from './lib/usePersistentState';
-import { KEYS, downloadJson, migratedV1 } from './lib/storage';
+import { EventTemplate, MinistryEvent, Leader, Parent, SmallGroup, Student, Task } from './types';
+import { downloadJson } from './lib/storage';
 import { keyOf } from './lib/helpers';
+import { useSession } from './lib/useSession';
+import { useCloudWorkspace, clearWorkspaceCache, SyncState } from './lib/useCloudWorkspace';
+import { supabase } from './lib/supabase';
 import { Modal } from './components/ui';
+import AuthScreen from './components/AuthScreen';
 import EventForm from './components/EventForm';
 import TaskForm from './components/TaskForm';
 import SettingsModal from './components/SettingsModal';
@@ -84,20 +86,52 @@ function Brand() {
   );
 }
 
-export default function App() {
+const SYNC_META: Record<SyncState, { dot: string; label: string }> = {
+  loading: { dot: 'bg-stone-300', label: 'Loading…' },
+  saving: { dot: 'bg-amber-400 animate-pulse', label: 'Saving…' },
+  synced: { dot: 'bg-emerald-500', label: 'Synced' },
+  offline: { dot: 'bg-stone-400', label: 'Offline' },
+};
+
+function SyncBadge({ state, label = true }: { state: SyncState; label?: boolean }) {
+  const m = SYNC_META[state];
+  return (
+    <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-stone-400">
+      <span className={`h-1.5 w-1.5 rounded-full ${m.dot}`} />
+      {label && m.label}
+    </span>
+  );
+}
+
+function Splash() {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="flex h-14 w-14 animate-pop items-center justify-center rounded-3xl bg-gradient-to-br from-brand-500 to-brand-700 font-display text-2xl font-semibold text-white shadow-glow ring-1 ring-white/30">
+        Y
+      </div>
+    </div>
+  );
+}
+
+/** The signed-in app. Its data lives in the cloud, scoped to this user. */
+function Workspace({ userId, email }: { userId: string; email: string }) {
   const [tab, setTab] = useState<Tab>('dashboard');
-  const [events, setEvents] = usePersistentState<MinistryEvent[]>(
-    KEYS.events,
-    () => migratedV1<MinistryEvent[]>('events') ?? EVENTS,
-  );
-  const [tasks, setTasks] = usePersistentState<Task[]>(
-    KEYS.tasks,
-    () => migratedV1<Task[]>('tasks') ?? TASKS,
-  );
-  const [students, setStudents] = usePersistentState<Student[]>(KEYS.students, STUDENTS);
-  const [parents, setParents] = usePersistentState<Parent[]>(KEYS.parents, PARENTS);
-  const [leaders, setLeaders] = usePersistentState<Leader[]>(KEYS.leaders, LEADERS);
-  const [groups, setGroups] = usePersistentState<SmallGroup[]>(KEYS.groups, SMALL_GROUPS);
+  const {
+    sync,
+    events,
+    tasks,
+    students,
+    parents,
+    leaders,
+    groups,
+    setEvents,
+    setTasks,
+    setStudents,
+    setParents,
+    setLeaders,
+    setGroups,
+    setAll,
+  } = useCloudWorkspace(userId);
 
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [eventModal, setEventModal] = useState<EventModalState | null>(null);
@@ -144,7 +178,7 @@ export default function App() {
     setTab('events');
   };
 
-  // ----- backup / restore / reset -----
+  // ----- backup / restore / reset / account -----
 
   const exportData = () =>
     downloadJson(`youthos-backup-${keyOf(new Date())}.json`, {
@@ -171,13 +205,13 @@ export default function App() {
 
   const resetData = () => {
     if (!window.confirm("Clear all data? Every event, task, and person will be removed. This can't be undone.")) return;
-    setEvents([]);
-    setTasks([]);
-    setStudents([]);
-    setParents([]);
-    setLeaders([]);
-    setGroups([]);
+    setAll({ events: [], tasks: [], students: [], parents: [], leaders: [], groups: [] });
     setSelectedEventId(null);
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    clearWorkspaceCache();
   };
 
   return (
@@ -212,7 +246,10 @@ export default function App() {
             New task
           </button>
         </nav>
-        <div className="px-3 pb-3">
+        <div className="flex items-center justify-between px-5 pb-1 pt-2">
+          <SyncBadge state={sync} />
+        </div>
+        <div className="px-3 pb-4">
           <button
             onClick={() => setSettingsOpen(true)}
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-stone-500 transition hover:bg-white hover:text-ink active:scale-[0.98]"
@@ -221,13 +258,6 @@ export default function App() {
             Data & settings
           </button>
         </div>
-        <p className="font-display px-5 pb-6 text-[13px] font-medium italic leading-relaxed text-stone-400">
-          Plan the year.
-          <br />
-          Run the week.
-          <br />
-          Care for the one.
-        </p>
       </aside>
 
       {/* Mobile / tablet header */}
@@ -248,13 +278,16 @@ export default function App() {
               </button>
             ))}
           </nav>
-          <button
-            onClick={() => setSettingsOpen(true)}
-            aria-label="Data & settings"
-            className="ml-auto flex h-10 w-10 items-center justify-center rounded-full text-stone-500 transition hover:bg-white active:scale-90 md:ml-1"
-          >
-            <Icon d={SETTINGS_ICON} />
-          </button>
+          <div className="ml-auto flex items-center gap-1 md:ml-1">
+            <SyncBadge state={sync} label={false} />
+            <button
+              onClick={() => setSettingsOpen(true)}
+              aria-label="Data & settings"
+              className="flex h-10 w-10 items-center justify-center rounded-full text-stone-500 transition hover:bg-white active:scale-90"
+            >
+              <Icon d={SETTINGS_ICON} />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -377,12 +410,24 @@ export default function App() {
 
       {settingsOpen && (
         <SettingsModal
+          email={email}
+          syncLabel={SYNC_META[sync].label}
           onExport={exportData}
           onImport={importData}
           onReset={resetData}
+          onSignOut={signOut}
           onClose={() => setSettingsOpen(false)}
         />
       )}
     </div>
   );
+}
+
+export default function App() {
+  const session = useSession();
+
+  if (session === undefined) return <Splash />;
+  if (session === null) return <AuthScreen />;
+
+  return <Workspace userId={session.user.id} email={session.user.email ?? ''} />;
 }
