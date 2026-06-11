@@ -1,5 +1,4 @@
-import { MinistryEvent, Task } from '../types';
-import { STUDENTS } from '../lib/data';
+import { MinistryEvent, Student, Task } from '../types';
 import {
   CATEGORY_META,
   TASK_CATEGORY_META,
@@ -19,8 +18,10 @@ import { Avatar, Badge, Card, EmptyState, SectionTitle } from '../components/ui'
 interface Props {
   events: MinistryEvent[];
   tasks: Task[];
+  students: Student[];
   onToggleTask: (id: string) => void;
   onOpenEvent: (id: string) => void;
+  onClearFollowUp: (id: string) => void;
 }
 
 function EventRow({ e, onOpen }: { e: MinistryEvent; onOpen: (id: string) => void }) {
@@ -55,7 +56,7 @@ function EventRow({ e, onOpen }: { e: MinistryEvent; onOpen: (id: string) => voi
   );
 }
 
-export default function Dashboard({ events, tasks, onToggleTask, onOpenEvent }: Props) {
+export default function Dashboard({ events, tasks, students, onToggleTask, onOpenEvent, onClearFollowUp }: Props) {
   const upcoming = events
     .filter((e) => !isPast(e.start) && e.status !== 'complete')
     .sort((a, b) => a.start.localeCompare(b.start));
@@ -78,7 +79,7 @@ export default function Dashboard({ events, tasks, onToggleTask, onOpenEvent }: 
       ? 100
       : Math.round(parentFacing.reduce((s, e) => s + clarityScore(e), 0) / parentFacing.length);
 
-  const careList = STUDENTS.filter((s) => s.needsFollowUp);
+  const careList = students.filter((s) => s.needsFollowUp);
 
   const todayLong = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -250,6 +251,13 @@ export default function Dashboard({ events, tasks, onToggleTask, onOpenEvent }: 
                       <p className="truncate text-xs text-stone-500">{s.followUpReason}</p>
                     </div>
                     <span className="text-xs font-semibold text-stone-400">{s.grade}</span>
+                    <button
+                      onClick={() => onClearFollowUp(s.id)}
+                      title="Mark cared for"
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-stone-300 transition hover:bg-emerald-50 hover:text-emerald-600"
+                    >
+                      ✓
+                    </button>
                   </div>
                 ))
               )}

@@ -93,9 +93,20 @@ not a church database, not a social app.
   wayfinding.
 - Mobile: bottom tab bar; desktop: top nav pills. Single column stacks first, two columns at `lg`.
 
-## v0.1 scope (this version)
+## Current scope (v0.9 — release candidate)
 
-In: all seven modules, fully navigable, mock data, interactive checkboxes (task done, checklist
-items) held in client state. Out (deliberately): persistence, event creation/editing, auth,
-payments, backend, notifications, AI. The goal is that it *feels* like a real youth ministry
-operating system within one session.
+In: all seven modules fully editable and persistent (localStorage, `youthos:v2:*` keys).
+Clarity fields carry the **actual info** (`details` on the event), and two generators turn an
+event into communication: a parent update email draft (missing info becomes [TODO] lines) and a
+leader run sheet. The People layer is real CRUD with two-way links (student↔group,
+student↔parent) kept in sync and cascade-safe deletes. Backup/restore via JSON download/import
+in Data & settings.
+
+Out (deliberately, until v1.0): auth, cloud sync/backend, billing, notifications, sending email/
+SMS directly, AI. The product gate for charging money is the backend release — see `ROADMAP.md`
+and `business/LAUNCH-PLAN.md`.
+
+**Privacy note for v1.0:** student records are data about minors. When the backend lands, this
+spec requires row-level security, minimal collection (no birthdays/addresses unless needed),
+export + delete-everything controls, and a plain-English privacy promise. "Church data stays
+church data."

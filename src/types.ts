@@ -38,6 +38,13 @@ export interface ClarityInfo {
   packingList: boolean;
 }
 
+/**
+ * The actual info behind each clarity field ("Pick up at 9:30 PM in the main
+ * lot", "$10 covers food + gas"). Powers the parent update draft. A field can
+ * be marked communicated without a stored detail (e.g. covered verbally).
+ */
+export type ClarityDetails = Partial<Record<keyof ClarityInfo, string>>;
+
 export interface VolunteerNeed {
   role: string;
   needed: number;
@@ -70,6 +77,7 @@ export interface MinistryEvent {
   parentComm: TrackStatus;
   checklist: ChecklistItem[];
   clarity: ClarityInfo;
+  details?: ClarityDetails;
   notes?: string;
 }
 

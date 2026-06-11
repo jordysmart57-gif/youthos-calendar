@@ -16,9 +16,10 @@ import { Badge, Card, Chip, EmptyState, SectionTitle } from '../components/ui';
 interface Props {
   events: MinistryEvent[];
   onOpenEvent: (id: string) => void;
+  onNewEvent: (date: string) => void;
 }
 
-export default function CalendarView({ events, onOpenEvent }: Props) {
+export default function CalendarView({ events, onOpenEvent, onNewEvent }: Props) {
   const [monthDate, setMonthDate] = useState(() => {
     const d = new Date();
     d.setDate(1);
@@ -180,7 +181,18 @@ export default function CalendarView({ events, onOpenEvent }: Props) {
       </Card>
 
       <section>
-        <SectionTitle>{fmtDateLong(`${selectedKey}T12:00`)}</SectionTitle>
+        <SectionTitle
+          action={
+            <button
+              onClick={() => onNewEvent(selectedKey)}
+              className="text-xs font-bold text-brand-700 underline-offset-2 hover:underline"
+            >
+              + Add event this day
+            </button>
+          }
+        >
+          {fmtDateLong(`${selectedKey}T12:00`)}
+        </SectionTitle>
         {selectedEvents.length === 0 ? (
           <EmptyState title="Nothing on this day" hint="Tap another day, or go build something with a template." />
         ) : (

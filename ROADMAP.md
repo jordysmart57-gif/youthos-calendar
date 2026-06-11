@@ -14,7 +14,7 @@ Mock-data dashboard that feels like a real youth ministry operating system.
 - 12 event templates with checklists + lead times
 - Relative-dated mock data so the demo never goes stale
 
-## ✅ v0.2 — Make It Editable (current)
+## ✅ v0.2 — Make It Editable
 
 The jump from demo to tool.
 
@@ -26,38 +26,42 @@ The jump from demo to tool.
 - ✅ **localStorage persistence** (`youthos:v1:*` keys) with a "Reset sample data" escape hatch
 - ✅ Quick-add task from anywhere (sidebar button on desktop, floating button on mobile)
 
-## v0.3 — Communicate
+## ✅ v0.9 — Release Candidate (current)
 
-Turn clarity data into actual parent communication.
+Everything a solo youth pastor needs to run the ministry from one place, on one device.
 
-- **Parent update generator**: compose a parent email/text draft from an event's clarity fields —
-  the missing-field list becomes the editing checklist
-- **Leader briefing generator**: one-page run sheet per event (schedule, volunteers, supplies, notes)
-- Week-ahead summary view ("what I tell my leaders on Sunday")
-- Export/print friendly views
+- ✅ **Clarity fields hold the actual info** ("Pick-up: 4:30 PM at the main lot"), not just checkmarks
+- ✅ **Parent update generator** — a ready-to-send email draft built from the event's details;
+  anything missing becomes a [TODO] line
+- ✅ **Leader run sheet generator** — one-page briefing: team, outstanding checklist, key info, notes
+- ✅ **People layer fully editable** — add/edit/delete students, parents, leaders, and small groups,
+  with two-way links (student↔group, student↔parent) kept in sync and cascade-safe deletes
+- ✅ Follow-up workflow: flag with a reason, clear from the dashboard or People view ("Done ✓")
+- ✅ Volunteer "needed" counts editable; add event directly on a calendar day
+- ✅ **Backup & restore** — download/import a JSON backup from Data & settings; reset sample data
 
-## v0.4 — Volunteers & Care
+## v1.0 — Real Data, Real Church (the backend release)
 
-- Volunteer scheduling grid by week (who serves where, gaps highlighted)
-- Background-check expiry warnings on the dashboard
-- Student care log: follow-up history per student, not just a flag
-- Attendance quick-entry for weekly gatherings (powers the "missed 3 weeks" flag for real)
+This is the release that unlocks charging money — see `business/LAUNCH-PLAN.md`.
 
-## v1.0 — Real Data, Real Church
-
-- Backend + database (Supabase is the natural fit) with auth
+- Backend + database (Supabase is the natural fit): auth, cloud sync, automatic backups
 - Multi-leader access with roles (pastor edits, leaders view/check off)
-- Form + payment *status* tracking against real rosters (still not processing payments)
-- Planning Center import/sync exploration (people + registrations)
+- Security pass: RLS policies, minor-data privacy review (student data is sensitive), data export/delete
+- Stripe billing (Pro/Team plans per the launch plan)
+- Landing page + onboarding flow
 
 ## Later / ideas parking lot
 
+- Attendance quick-entry (powers the "missed 3 weeks" flag for real) + student care log history
+- Volunteer scheduling grid by week; background-check expiry warnings on the dashboard
+- Week-ahead summary view; print/export-friendly views
 - Recurring events done properly
-- Parent-facing public event page generated from clarity fields
+- Parent-facing public event page generated from clarity details
 - SMS/email sending integrations
 - Year-at-a-glance planning view with template lead-time back-scheduling
-- AI assists: draft parent updates, suggest checklists, flag at-risk students
-- Multi-church (this is where it becomes an Apollos Systems product)
+- Planning Center import/sync (people + registrations)
+- AI assists: draft parent updates in your voice, suggest checklists, flag at-risk students
+- Multi-church admin (the Apollos Systems product play)
 
 ## Non-goals (firm)
 

@@ -8,15 +8,18 @@ interface Props {
   initial?: MinistryEvent;
   /** Present when creating from a template — seeds checklist, volunteers, clarity. */
   template?: EventTemplate;
+  /** Pre-selected date (yyyy-mm-dd) when creating from the calendar. */
+  initialDate?: string;
   onSave: (e: MinistryEvent) => void;
   onClose: () => void;
 }
 
 const STATUS_OPTIONS = Object.keys(STATUS_META) as EventStatus[];
 
-export default function EventForm({ initial, template, onSave, onClose }: Props) {
+export default function EventForm({ initial, template, initialDate, onSave, onClose }: Props) {
   const defaultDate = () => {
     if (initial) return initial.start.slice(0, 10);
+    if (initialDate) return initialDate;
     const d = new Date();
     d.setDate(d.getDate() + (template ? template.leadTimeWeeks * 7 : 7));
     return keyOf(d);

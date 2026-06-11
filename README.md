@@ -12,14 +12,15 @@ communicating with parents, scheduling volunteers, and following up with student
 |------|--------------|
 | **Home Dashboard** | This week in youth ministry, upcoming events, urgent tasks, volunteer gaps, parent clarity issues, student care list |
 | **Calendar** | Month view with category filters: Middle School, High School, Leaders, Parents, Camps/Trips, Bible Studies, Deadlines, Promo Tasks |
-| **Event Command Center** | Every event with status, registration, volunteer needs, forms / payments / transportation / parent-comms tracking, checklist progress, and a Parent Clarity Score |
-| **People** | Students, parents, leaders, new students, follow-up-needed list, small groups |
+| **Event Command Center** | Every event with status, registration, volunteer needs, forms / payments / transportation / parent-comms tracking, checklist progress, a Parent Clarity Score, and one-tap **parent update + leader run sheet drafts** |
+| **People** | Students, parents, leaders, new students, follow-up workflow, small groups — fully editable with linked records kept in sync |
 | **Tasks** | Event prep, communication, shopping, volunteer follow-up, parent follow-up, student care |
 | **Templates** | 12 ready-to-run event blueprints (Camp, Lake Day, Tribe Night, Mission Trip, …) — one tap creates a real event with the checklist, volunteer roles, and clarity requirements seeded |
 
-Everything is editable (v0.2): create events from templates or from scratch, edit/delete them,
-add tasks from anywhere, check off checklists, tap clarity fields and ops-track statuses to
-update them, and adjust volunteer/registration counts with steppers.
+Everything is editable: create events from templates, the calendar, or from scratch; manage your
+whole roster; tap a clarity field to record the actual info ("Pick-up: 4:30 PM at the main lot")
+and YouthOS turns it into a ready-to-send parent email. Back up and restore your data anytime
+from **Data & settings**.
 
 ### The Parent Clarity Score
 

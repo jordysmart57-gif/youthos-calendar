@@ -4,17 +4,44 @@
 
 ## Last updated
 
-**June 10, 2026, ~2:45 PM** — Session 003 (v0.2: editable + persistent)
+**June 10, 2026, ~4:00 PM** — Session 004 (v0.9 release candidate + launch plan)
 
 ## Current project status
 
-🟢 **v0.2.0 live in production: https://youthos-calendar.vercel.app**
+🟢 **v0.9.0 — release candidate — live in production: https://youthos-calendar.vercel.app**
 
-The app is now a real tool, not just a demo: events can be created from templates (or scratch),
-edited, and deleted; tasks can be quick-added from anywhere and deleted; checklists, clarity
-fields, ops tracks, volunteer counts, and registration are all editable in place; and everything
-persists in localStorage between sessions. Browser-verified end-to-end (template → event →
-clarity toggle → task add → hard reload), zero console errors.
+Feature-complete for a solo youth pastor on one device. Everything is editable and persistent;
+no read-only filler remains. The two headline additions: **clarity fields now store the actual
+info** (not just checkmarks), and two **generators** turn an event into communication — a
+ready-to-send parent email draft and a leader run sheet. The People layer is full CRUD with
+linked records kept in sync. Backup/restore shipped. What stands between this and charging money
+is the v1.0 backend (auth + sync + billing) — the business case for that is now written in
+`business/LAUNCH-PLAN.md`.
+
+### Session 004 — June 10, 2026 (v0.9)
+
+- **Clarity details** (`details` on MinistryEvent, `ClarityDetails` type): tapping a clarity field
+  opens an inline editor — save the actual info ("4:30 PM at the main lot"), mark covered without
+  a note, or mark not covered. Values show under each field and feed the generators.
+- **Parent update generator** (`draftParentUpdate` in helpers): emoji-lined email draft from the
+  event's details; needed-but-missing fields become `[TODO — fill in before sending]` lines.
+  **Leader run sheet** (`draftLeaderBriefing`): team roster w/ gaps, outstanding checklist, key
+  info, notes. Both open in an editable textarea modal with copy-to-clipboard ("Communicate" card
+  on event detail).
+- **People layer is real now**: PeopleView rewritten with add/edit/delete for students, parents,
+  leaders, and groups (`components/PeopleForms.tsx`). Student↔group and student↔parent links sync
+  both directions on every save; deletes cascade safely. Follow-up flags clear with one tap from
+  the dashboard ("✓") or People view ("Done ✓"). People persist (`youthos:v2:*` keys).
+- **Backup & restore** (`components/SettingsModal.tsx`, `lib/storage.ts`): download a JSON backup,
+  restore from file, reset sample data — from "Data & settings" (sidebar + mobile header gear).
+- Smaller: volunteer "needed" editable inline; "+ Add event this day" on the calendar; storage
+  schema v2 with silent v1 migration; version → 0.9.0.
+- **`business/LAUNCH-PLAN.md` (new):** pricing (free Solo / $12-mo-annual Pro / $24-mo-annual Team,
+  $99/yr × 25 founding members), sober revenue math, 4-phase marketing plan hooked on the Parent
+  Clarity Score, metrics, and a pre-launch checklist.
+- Verified in browser end-to-end on a cleared profile: clarity detail save (score 70→80%, value
+  persisted), parent draft contained the saved detail + TODOs, student add persisted + rendered,
+  zero console errors. `npm run build` passes.
 
 📦 **Project location: `/Users/jordansmart/youthos-calendar`** — moved out of the Apollos Systems
 vault (June 10, 2026) to live as its own top-level project folder alongside Jordan's other
@@ -125,19 +152,18 @@ curl https://youthos-calendar.vercel.app   # 200, correct <title>
 
 ## Known issues
 
-- **Sample-data drift after first persist** — by design; "Reset sample data" (sidebar) restores a
-  relative-dated demo set. Real user-created events are unaffected.
-- Volunteer "needed" counts aren't editable after creation (only confirmed) — remove + re-add the
-  role as a workaround; proper edit is a v0.4 nicety.
-- People layer is still read-only mock data (students/parents/leaders editing isn't scoped until
-  v0.4 attendance work).
-- Live site is on Vercel's default URL; custom domain undecided.
+- **Sample-data drift after first persist** — by design; "Reset sample data" (Data & settings)
+  restores a relative-dated demo set. Real user data is unaffected.
+- Single-device by nature (localStorage) until the v1.0 backend — mitigated by backup/restore.
+- Contact-person clarity defaults to true in some sample events, so the parent draft can show
+  "[your name + number]" even at high clarity — fill the detail once per event.
+- Live site is on Vercel's default URL; custom domain undecided (ideas in LAUNCH-PLAN).
 
 ## Next recommended steps
 
-1. **v0.3 — the parent update generator**: compose a parent email/text draft straight from an
-   event's clarity fields (the missing-field list becomes the editing checklist). This is the
-   feature that makes the Parent Clarity Score earn its keep, and all the data is now in place.
-2. The v0.3 **leader briefing generator** (one-page run sheet per event) pairs naturally with it.
+1. **v1.0 backend** (the money gate, per `business/LAUNCH-PLAN.md`): Supabase auth + cloud sync +
+   RLS security pass (student data = minors), then Stripe billing. Suggested path: a `backend`
+   branch, incremental — auth → sync events/tasks → sync people → billing.
+2. **Domain + landing page + waitlist** can start immediately — doesn't depend on the backend.
 3. Housekeeping: connect the GitHub repo to the Vercel project for auto-deploys
    (dashboard → Settings → Git); until then `npx vercel deploy --prod --yes` after pushes.

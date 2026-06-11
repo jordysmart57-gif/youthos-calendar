@@ -218,6 +218,90 @@ export function buildEvent(base: EventBase, template?: EventTemplate): MinistryE
   };
 }
 
+// ---------- Clarity details + communication drafts ----------
+
+export const CLARITY_HINTS: Record<keyof ClarityInfo, string> = {
+  date: 'e.g. Saturday, June 27',
+  time: 'e.g. 10:00 AM – 4:00 PM',
+  dropOffLocation: 'e.g. Church main lot, 9:45 AM',
+  pickUpTime: 'e.g. 4:30 PM at the church lot',
+  cost: 'e.g. $10 — covers lunch + gas. Scholarships available.',
+  foodInfo: 'e.g. Burgers provided. Bring a snack to share.',
+  forms: 'e.g. Waiver required — link in the parent email',
+  contactPerson: 'e.g. Jordan — (541) 555-0100',
+  transportation: 'e.g. Church vans both ways / No bus — parents drive',
+  packingList: 'e.g. Swimsuit, towel, sunscreen, water bottle',
+};
+
+/** Draft a parent email from the event's clarity details. Missing-but-needed fields become TODOs. */
+export function draftParentUpdate(e: MinistryEvent): string {
+  const d = e.details ?? {};
+  const lines: string[] = [];
+  lines.push(`Subject: ${e.title} — everything you need to know`);
+  lines.push('');
+  lines.push('Hi parents!');
+  lines.push('');
+  lines.push(`${e.title} is coming up — here are the details:`);
+  lines.push('');
+  lines.push(`📅 When: ${fmtDateLong(e.start)} · ${d.time ?? fmtTime(e.start)}`);
+  lines.push(`📍 Where: ${e.location}`);
+  const item = (key: keyof ClarityInfo, emoji: string, label: string) => {
+    if (d[key]) lines.push(`${emoji} ${label}: ${d[key]}`);
+    else if (!e.clarity[key]) lines.push(`${emoji} ${label}: [TODO — fill in before sending]`);
+  };
+  item('dropOffLocation', '🚗', 'Drop-off');
+  item('pickUpTime', '🕐', 'Pick-up');
+  item('cost', '💵', 'Cost');
+  item('foodInfo', '🍔', 'Food');
+  item('forms', '📋', 'Forms');
+  item('transportation', '🚌', 'Getting there');
+  item('packingList', '🎒', 'What to bring');
+  lines.push('');
+  lines.push(`Questions? Reach out to ${d.contactPerson ?? '[your name + number]'} anytime.`);
+  lines.push('');
+  lines.push("We'd love to have your student there!");
+  return lines.join('\n');
+}
+
+/** Draft a one-page leader run sheet: team, outstanding checklist, key info, notes. */
+export function draftLeaderBriefing(e: MinistryEvent): string {
+  const lines: string[] = [];
+  lines.push(`${e.title.toUpperCase()} — LEADER RUN SHEET`);
+  lines.push(`${fmtDateLong(e.start)} · ${fmtTime(e.start)} · ${e.location}`);
+  lines.push(`Who: ${e.targetGroup}`);
+  if (e.capacity) lines.push(`Registered: ${e.registered}/${e.capacity}`);
+  else if (e.registered > 0) lines.push(`Expecting: ${e.registered}`);
+  lines.push('');
+  if (e.volunteers.length > 0) {
+    lines.push('TEAM');
+    for (const v of e.volunteers) {
+      const open = Math.max(0, v.needed - v.confirmed);
+      lines.push(`• ${v.role}: ${v.confirmed}/${v.needed}${open > 0 ? ` — ${open} STILL NEEDED` : ''}`);
+    }
+    lines.push('');
+  }
+  const todo = e.checklist.filter((c) => !c.done);
+  if (todo.length > 0) {
+    lines.push(`STILL TO DO (${todo.length})`);
+    for (const c of todo) lines.push(`☐ ${c.label}`);
+    lines.push('');
+  }
+  const d = e.details ?? {};
+  const info = CLARITY_FIELDS.filter((f) => d[f.key]).map((f) => `• ${f.label}: ${d[f.key]}`);
+  if (info.length > 0) {
+    lines.push('KEY INFO');
+    lines.push(...info);
+    lines.push('');
+  }
+  if (e.notes) {
+    lines.push('NOTES');
+    lines.push(e.notes);
+    lines.push('');
+  }
+  lines.push('Thanks for serving — you make this happen.');
+  return lines.join('\n');
+}
+
 export function initials(name: string): string {
   return name
     .split(' ')

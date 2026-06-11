@@ -1,7 +1,7 @@
 {
   "name": "youthos-calendar",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.9.0",
   "type": "module",
   "description": "YouthOS — a youth ministry command center. Plan the year. Run the week. Care for the one.",
   "scripts": {

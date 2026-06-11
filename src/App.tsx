@@ -1,10 +1,13 @@
 import { ReactNode, useState } from 'react';
-import { EventTemplate, MinistryEvent, Task } from './types';
-import { EVENTS, TASKS } from './lib/data';
+import { EventTemplate, Leader, MinistryEvent, Parent, SmallGroup, Student, Task } from './types';
+import { EVENTS, LEADERS, PARENTS, SMALL_GROUPS, STUDENTS, TASKS } from './lib/data';
 import { usePersistentState } from './lib/usePersistentState';
+import { KEYS, downloadJson, migratedV1 } from './lib/storage';
+import { keyOf } from './lib/helpers';
 import { Modal } from './components/ui';
 import EventForm from './components/EventForm';
 import TaskForm from './components/TaskForm';
+import SettingsModal from './components/SettingsModal';
 import Dashboard from './views/Dashboard';
 import CalendarView from './views/CalendarView';
 import EventsView from './views/EventsView';
@@ -17,6 +20,7 @@ type Tab = 'dashboard' | 'calendar' | 'events' | 'people' | 'tasks' | 'templates
 interface EventModalState {
   template?: EventTemplate;
   editId?: string;
+  date?: string;
 }
 
 function Icon({ d }: { d: string }) {
@@ -34,6 +38,8 @@ function Icon({ d }: { d: string }) {
     </svg>
   );
 }
+
+const SETTINGS_ICON = 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6';
 
 const TABS: { id: Tab; label: string; icon: ReactNode }[] = [
   { id: 'dashboard', label: 'Home', icon: <Icon d="M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5" /> },
@@ -80,11 +86,23 @@ function Brand() {
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('dashboard');
-  const [events, setEvents] = usePersistentState<MinistryEvent[]>('youthos:v1:events', EVENTS);
-  const [tasks, setTasks] = usePersistentState<Task[]>('youthos:v1:tasks', TASKS);
+  const [events, setEvents] = usePersistentState<MinistryEvent[]>(
+    KEYS.events,
+    () => migratedV1<MinistryEvent[]>('events') ?? EVENTS,
+  );
+  const [tasks, setTasks] = usePersistentState<Task[]>(
+    KEYS.tasks,
+    () => migratedV1<Task[]>('tasks') ?? TASKS,
+  );
+  const [students, setStudents] = usePersistentState<Student[]>(KEYS.students, STUDENTS);
+  const [parents, setParents] = usePersistentState<Parent[]>(KEYS.parents, PARENTS);
+  const [leaders, setLeaders] = usePersistentState<Leader[]>(KEYS.leaders, LEADERS);
+  const [groups, setGroups] = usePersistentState<SmallGroup[]>(KEYS.groups, SMALL_GROUPS);
+
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [eventModal, setEventModal] = useState<EventModalState | null>(null);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const updateEvent = (id: string, fn: (e: MinistryEvent) => MinistryEvent) =>
     setEvents((es) => es.map((e) => (e.id === id ? fn(e) : e)));
@@ -116,17 +134,50 @@ export default function App() {
     setTaskModalOpen(false);
   };
 
-  const resetData = () => {
-    if (window.confirm('Reset everything back to the sample data? Your changes will be lost.')) {
-      setEvents(EVENTS);
-      setTasks(TASKS);
-      setSelectedEventId(null);
-    }
-  };
+  const clearFollowUp = (id: string) =>
+    setStudents((ss) =>
+      ss.map((s) => (s.id === id ? { ...s, needsFollowUp: false, followUpReason: undefined } : s)),
+    );
 
   const openEvent = (id: string) => {
     setSelectedEventId(id);
     setTab('events');
+  };
+
+  // ----- backup / restore / reset -----
+
+  const exportData = () =>
+    downloadJson(`youthos-backup-${keyOf(new Date())}.json`, {
+      app: 'youthos',
+      schema: 2,
+      exportedAt: new Date().toISOString(),
+      data: { events, tasks, students, parents, leaders, groups },
+    });
+
+  const importData = (raw: unknown): string | null => {
+    if (typeof raw !== 'object' || raw === null) return "That file isn't a YouthOS backup.";
+    const data = ((raw as Record<string, unknown>).data ?? raw) as Record<string, unknown>;
+    let applied = 0;
+    if (Array.isArray(data.events)) { setEvents(data.events as MinistryEvent[]); applied++; }
+    if (Array.isArray(data.tasks)) { setTasks(data.tasks as Task[]); applied++; }
+    if (Array.isArray(data.students)) { setStudents(data.students as Student[]); applied++; }
+    if (Array.isArray(data.parents)) { setParents(data.parents as Parent[]); applied++; }
+    if (Array.isArray(data.leaders)) { setLeaders(data.leaders as Leader[]); applied++; }
+    if (Array.isArray(data.groups)) { setGroups(data.groups as SmallGroup[]); applied++; }
+    if (applied === 0) return 'No YouthOS data found in that file.';
+    setSelectedEventId(null);
+    return null;
+  };
+
+  const resetData = () => {
+    if (!window.confirm('Reset everything back to the sample data? Your changes will be lost.')) return;
+    setEvents(EVENTS);
+    setTasks(TASKS);
+    setStudents(STUDENTS);
+    setParents(PARENTS);
+    setLeaders(LEADERS);
+    setGroups(SMALL_GROUPS);
+    setSelectedEventId(null);
   };
 
   return (
@@ -157,21 +208,22 @@ export default function App() {
             New task
           </button>
         </nav>
-        <div className="px-5 py-5">
+        <div className="px-3 pb-3">
           <button
-            onClick={resetData}
-            className="mb-3 text-[11px] font-semibold text-stone-400 underline-offset-2 transition hover:text-stone-600 hover:underline"
+            onClick={() => setSettingsOpen(true)}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-stone-500 transition hover:bg-stone-200/60"
           >
-            Reset sample data
+            <Icon d={SETTINGS_ICON} />
+            Data & settings
           </button>
-          <p className="text-[11px] font-semibold leading-relaxed text-stone-400">
-            Plan the year.
-            <br />
-            Run the week.
-            <br />
-            Care for the one.
-          </p>
         </div>
+        <p className="px-5 pb-5 text-[11px] font-semibold leading-relaxed text-stone-400">
+          Plan the year.
+          <br />
+          Run the week.
+          <br />
+          Care for the one.
+        </p>
       </aside>
 
       {/* Mobile / tablet header */}
@@ -192,15 +244,35 @@ export default function App() {
               </button>
             ))}
           </nav>
+          <button
+            onClick={() => setSettingsOpen(true)}
+            aria-label="Data & settings"
+            className="ml-auto flex h-9 w-9 items-center justify-center rounded-full text-stone-500 transition hover:bg-stone-200/60 md:ml-1"
+          >
+            <Icon d={SETTINGS_ICON} />
+          </button>
         </div>
       </header>
 
       <div className="lg:pl-60">
         <main className="mx-auto max-w-7xl px-4 py-6 pb-24 md:pb-12 lg:px-8 lg:py-8">
           {tab === 'dashboard' && (
-            <Dashboard events={events} tasks={tasks} onToggleTask={toggleTask} onOpenEvent={openEvent} />
+            <Dashboard
+              events={events}
+              tasks={tasks}
+              students={students}
+              onToggleTask={toggleTask}
+              onOpenEvent={openEvent}
+              onClearFollowUp={clearFollowUp}
+            />
           )}
-          {tab === 'calendar' && <CalendarView events={events} onOpenEvent={openEvent} />}
+          {tab === 'calendar' && (
+            <CalendarView
+              events={events}
+              onOpenEvent={openEvent}
+              onNewEvent={(date) => setEventModal({ date })}
+            />
+          )}
           {tab === 'events' && (
             <EventsView
               events={events}
@@ -212,7 +284,18 @@ export default function App() {
               onNew={() => setEventModal({})}
             />
           )}
-          {tab === 'people' && <PeopleView />}
+          {tab === 'people' && (
+            <PeopleView
+              students={students}
+              parents={parents}
+              leaders={leaders}
+              groups={groups}
+              setStudents={setStudents}
+              setParents={setParents}
+              setLeaders={setLeaders}
+              setGroups={setGroups}
+            />
+          )}
           {tab === 'tasks' && (
             <TasksView
               tasks={tasks}
@@ -265,6 +348,7 @@ export default function App() {
           <EventForm
             initial={eventModal.editId ? events.find((e) => e.id === eventModal.editId) : undefined}
             template={eventModal.template}
+            initialDate={eventModal.date}
             onSave={saveEvent}
             onClose={() => setEventModal(null)}
           />
@@ -275,6 +359,15 @@ export default function App() {
         <Modal title="New task" onClose={() => setTaskModalOpen(false)}>
           <TaskForm events={events} onSave={saveTask} onClose={() => setTaskModalOpen(false)} />
         </Modal>
+      )}
+
+      {settingsOpen && (
+        <SettingsModal
+          onExport={exportData}
+          onImport={importData}
+          onReset={resetData}
+          onClose={() => setSettingsOpen(false)}
+        />
       )}
     </div>
   );

@@ -1,14 +1,17 @@
 import { FormEvent, useState } from 'react';
-import { EventCategory, MinistryEvent, TrackStatus } from '../types';
+import { ClarityInfo, EventCategory, MinistryEvent, TrackStatus } from '../types';
 import {
   ALL_CATEGORIES,
   CATEGORY_META,
   CLARITY_FIELDS,
+  CLARITY_HINTS,
   STATUS_META,
   TRACK_META,
   checklistPct,
   clarityScore,
   clarityTone,
+  draftLeaderBriefing,
+  draftParentUpdate,
   fmtDate,
   fmtDateLong,
   fmtTime,
@@ -16,7 +19,44 @@ import {
   nextTrackStatus,
   volunteerGap,
 } from '../lib/helpers';
-import { Badge, Card, Chip, EmptyState, ProgressBar, SectionTitle } from '../components/ui';
+import { Badge, Card, Chip, EmptyState, Modal, ProgressBar, SectionTitle } from '../components/ui';
+
+type ClarityKey = keyof ClarityInfo;
+
+function DraftModal({ title, text, onClose }: { title: string; text: string; onClose: () => void }) {
+  const [draft, setDraft] = useState(text);
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(draft);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // clipboard blocked — user can still select the text manually
+    }
+  };
+  return (
+    <Modal title={title} onClose={onClose}>
+      <textarea
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        rows={16}
+        className="w-full resize-y rounded-xl border border-stone-300 p-3 font-mono text-xs leading-relaxed focus:border-brand-500 focus:outline-none"
+      />
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <p className="text-[11px] font-medium text-stone-400">
+          Anything marked [TODO] still needs info — fill the clarity fields to remove them.
+        </p>
+        <button
+          onClick={copy}
+          className="shrink-0 rounded-full bg-stone-900 px-5 py-2 text-sm font-bold text-white transition hover:bg-stone-700"
+        >
+          {copied ? 'Copied ✓' : 'Copy text'}
+        </button>
+      </div>
+    </Modal>
+  );
+}
 
 interface Props {
   events: MinistryEvent[];
@@ -124,17 +164,35 @@ function EventDetail({
   const [newItem, setNewItem] = useState('');
   const [newRole, setNewRole] = useState('');
   const [newRoleNeeded, setNewRoleNeeded] = useState('2');
+  const [editingClarity, setEditingClarity] = useState<ClarityKey | null>(null);
+  const [clarityDraft, setClarityDraft] = useState('');
+  const [generator, setGenerator] = useState<'parent' | 'leader' | null>(null);
 
   const up = (fn: (ev: MinistryEvent) => MinistryEvent) => onUpdate(e.id, fn);
+
+  const openClarityEditor = (key: ClarityKey) => {
+    setEditingClarity(key);
+    setClarityDraft(e.details?.[key] ?? '');
+  };
+
+  const saveClarityDetail = (covered: boolean) => {
+    if (!editingClarity) return;
+    const key = editingClarity;
+    const val = clarityDraft.trim();
+    up((ev) => {
+      const details = { ...(ev.details ?? {}) };
+      if (covered && val) details[key] = val;
+      else delete details[key];
+      return { ...ev, details, clarity: { ...ev.clarity, [key]: covered } };
+    });
+    setEditingClarity(null);
+  };
 
   const cat = CATEGORY_META[e.category];
   const score = clarityScore(e);
   const tone = clarityTone(score);
   const pct = checklistPct(e);
   const doneCount = e.checklist.filter((c) => c.done).length;
-
-  const toggleClarity = (key: (typeof CLARITY_FIELDS)[number]['key']) =>
-    up((ev) => ({ ...ev, clarity: { ...ev.clarity, [key]: !ev.clarity[key] } }));
 
   const addChecklistItem = (evt: FormEvent) => {
     evt.preventDefault();
@@ -250,6 +308,28 @@ function EventDetail({
           </Card>
 
           <Card>
+            <SectionTitle>Communicate</SectionTitle>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <button
+                onClick={() => setGenerator('parent')}
+                className="rounded-xl bg-brand-600 px-3 py-2.5 text-sm font-bold text-white transition hover:bg-brand-700"
+              >
+                ✉️ Draft parent update
+              </button>
+              <button
+                onClick={() => setGenerator('leader')}
+                className="rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-sm font-bold text-stone-700 transition hover:border-stone-500"
+              >
+                📋 Leader run sheet
+              </button>
+            </div>
+            <p className="mt-2 text-[11px] font-medium text-stone-400">
+              Drafts are built from this event's details — copy, tweak, and send wherever you talk to
+              your people.
+            </p>
+          </Card>
+
+          <Card>
             <SectionTitle>Volunteers</SectionTitle>
             {e.volunteers.length === 0 ? (
               <EmptyState title="No volunteer roles yet" hint="Add the roles this event needs below." />
@@ -263,10 +343,23 @@ function EventDetail({
                         <span className="min-w-0 truncate font-bold">{v.role}</span>
                         <span className="flex shrink-0 items-center gap-1.5">
                           <StepperButton label="−" onClick={() => bumpConfirmed(v.role, -1)} />
-                          <span className="min-w-16 text-center text-xs font-semibold text-stone-500">
-                            {v.confirmed}/{v.needed} confirmed
-                          </span>
+                          <span className="text-xs font-semibold text-stone-500">{v.confirmed}</span>
                           <StepperButton label="+" onClick={() => bumpConfirmed(v.role, 1)} />
+                          <span className="text-xs font-semibold text-stone-400">of</span>
+                          <input
+                            type="number"
+                            min="1"
+                            value={v.needed}
+                            onChange={(ev2) => {
+                              const n = Math.max(1, parseInt(ev2.target.value, 10) || 1);
+                              up((ev) => ({
+                                ...ev,
+                                volunteers: ev.volunteers.map((x) => (x.role === v.role ? { ...x, needed: n } : x)),
+                              }));
+                            }}
+                            aria-label={`${v.role} needed`}
+                            className="w-12 rounded-lg border border-stone-200 px-1 py-0.5 text-center text-xs font-semibold focus:border-brand-500 focus:outline-none"
+                          />
                           {open > 0 && <Badge tone="bg-amber-100 text-amber-800">{open} open</Badge>}
                           <button
                             onClick={() =>
@@ -337,27 +430,74 @@ function EventDetail({
                   {CLARITY_FIELDS.map((f) => (
                     <li key={f.key}>
                       <button
-                        onClick={() => toggleClarity(f.key)}
-                        title="Tap to toggle"
-                        className="flex w-full items-center gap-1.5 rounded-lg px-1 py-0.5 text-left text-xs transition hover:bg-stone-50"
+                        onClick={() => openClarityEditor(f.key)}
+                        title="Tap to add the info"
+                        className={`w-full rounded-lg px-1 py-0.5 text-left text-xs transition hover:bg-stone-50 ${
+                          editingClarity === f.key ? 'bg-stone-100' : ''
+                        }`}
                       >
-                        <span
-                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
-                            e.clarity[f.key] ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-600'
-                          }`}
-                        >
-                          {e.clarity[f.key] ? '✓' : '✗'}
+                        <span className="flex items-center gap-1.5">
+                          <span
+                            className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                              e.clarity[f.key] ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-600'
+                            }`}
+                          >
+                            {e.clarity[f.key] ? '✓' : '✗'}
+                          </span>
+                          <span className={e.clarity[f.key] ? 'font-semibold' : 'font-semibold text-stone-400'}>
+                            {f.label}
+                          </span>
                         </span>
-                        <span className={e.clarity[f.key] ? 'font-semibold' : 'font-semibold text-stone-400'}>
-                          {f.label}
-                        </span>
+                        {e.details?.[f.key] && (
+                          <span className="mt-0.5 block truncate pl-[22px] text-[10px] font-medium text-stone-400">
+                            {e.details[f.key]}
+                          </span>
+                        )}
                       </button>
                     </li>
                   ))}
                 </ul>
+                {editingClarity && (
+                  <div className="mt-3 rounded-xl bg-stone-50 p-3">
+                    <p className="text-xs font-extrabold uppercase tracking-wide text-stone-500">
+                      {CLARITY_FIELDS.find((f) => f.key === editingClarity)?.label}
+                    </p>
+                    <input
+                      autoFocus
+                      value={clarityDraft}
+                      onChange={(ev2) => setClarityDraft(ev2.target.value)}
+                      onKeyDown={(ev2) => {
+                        if (ev2.key === 'Enter') saveClarityDetail(true);
+                        if (ev2.key === 'Escape') setEditingClarity(null);
+                      }}
+                      placeholder={CLARITY_HINTS[editingClarity]}
+                      className="mt-2 w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm font-semibold placeholder:font-medium placeholder:text-stone-400 focus:border-brand-500 focus:outline-none"
+                    />
+                    <div className="mt-2 flex flex-wrap justify-end gap-2">
+                      <button
+                        onClick={() => setEditingClarity(null)}
+                        className="rounded-full px-3 py-1.5 text-xs font-bold text-stone-500 transition hover:bg-stone-200/60"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => saveClarityDetail(false)}
+                        className="rounded-full border border-rose-200 px-3 py-1.5 text-xs font-bold text-rose-600 transition hover:border-rose-400"
+                      >
+                        Not covered
+                      </button>
+                      <button
+                        onClick={() => saveClarityDetail(true)}
+                        className="rounded-full bg-stone-900 px-4 py-1.5 text-xs font-bold text-white transition hover:bg-stone-700"
+                      >
+                        Save as covered
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <p className="mt-3 text-[11px] font-medium text-stone-500">
-                  Tap a field once it's been communicated to parents. "No bus — parents drive" counts
-                  as transportation info.
+                  Tap a field to record the actual info — it feeds the parent update draft. "No bus —
+                  parents drive" counts as transportation info.
                 </p>
               </>
             ) : (
@@ -428,6 +568,14 @@ function EventDetail({
           </Card>
         </div>
       </div>
+
+      {generator && (
+        <DraftModal
+          title={generator === 'parent' ? 'Parent update draft' : 'Leader run sheet'}
+          text={generator === 'parent' ? draftParentUpdate(e) : draftLeaderBriefing(e)}
+          onClose={() => setGenerator(null)}
+        />
+      )}
     </div>
   );
 }
