@@ -4,7 +4,47 @@
 
 ## Last updated
 
-**June 10, 2026, ~4:00 PM** — Session 004 (v0.9 release candidate + launch plan)
+**June 11, 2026** — Session 005 (mobile optimization + design elevation)
+
+### Session 005 — June 11, 2026 (design + mobile)
+
+A full visual-design and mobile-optimization pass, plus two cleanups requested
+along the way. Deployed to production.
+
+- **Design direction — "warm editorial ministry."** Introduced **Fraunces**
+  (optical display serif) for headings, the wordmark, and the dashboard stat
+  numbers, paired with Plus Jakarta Sans for UI/body. New `PageTitle` and
+  `font-display` utility. This is the signature move — warm, human, editorial,
+  on-brand for "care for the one" and explicitly *not* dark-mode SaaS.
+- **Atmosphere + depth** (`index.css`): layered warm background (soft gold
+  light + gradient, fixed `body::before`) instead of flat cream; brown-tinted
+  elevation tokens (`--shadow-soft/-lift/-glow`) so white cards lift; gold
+  focus rings; gradient brand mark + avatars with rings. Entrance motion
+  (`fade-up` per view via a `key={tab}` wrapper, staggered stat `pop`), all
+  behind `prefers-reduced-motion`.
+- **Mobile optimization** (the core ask):
+  - `viewport-fit=cover` + `env(safe-area-inset-*)` on the header, bottom tab
+    bar, FAB, modal, and main padding — clears notch + home indicator. Helper
+    classes `.safe-top/.safe-bottom/.safe-x`.
+  - **16px inputs on phones** (`inputCls` + a global `@media (max-width:640px)`
+    rule) to stop iOS Safari's focus zoom-jump. **Verified 16px in-browser.**
+  - Native-feeling **frosted bottom tab bar** with a gold active-indicator pill
+    + icon scale; **bottom-sheet modal** with drag handle and safe-area padding;
+    bigger touch targets (FAB 56px, nav/header 40px); `:active` press feedback
+    throughout; momentum scroll (`.scroll-rail`) + tap-highlight removal.
+  - PWA meta (apple-mobile-web-app-capable, title, theme color).
+- **Touched:** `index.html`, `src/index.css`, `src/components/ui.tsx`
+  (Card gains `style`; new `PageTitle`; Modal/Chip/Avatar/inputCls refined),
+  `src/App.tsx` (shell, tab bar, FAB, brand, view transition), and all six
+  views (display-serif titles; Dashboard stat cards + eyebrow).
+- **Verified** in browser at 375px and 1280px: hero, stat cards, calendar,
+  events list, and the task bottom-sheet render clean; input font-size 16px
+  confirmed via inspect. `npm run build` passes. Pushed + deployed to Vercel
+  prod (live at https://youthos-calendar.vercel.app).
+- Earlier in the session: removed remaining placeholder strings (`TBD` default,
+  `[your name + number]`/`[TODO]` in drafts) and **emptied all sample data**
+  (events/tasks/people) so the app ships blank — templates kept. Added a ✕
+  delete button on every event card; "Reset to sample data" → "Clear all data".
 
 ## Current project status
 
