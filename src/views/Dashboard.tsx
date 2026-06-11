@@ -42,7 +42,7 @@ function EventRow({ e, onOpen }: { e: MinistryEvent; onOpen: (id: string) => voi
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-bold">{e.title}</p>
         <p className="truncate text-xs text-stone-500">
-          {fmtTime(e.start)} · {e.location}
+          {fmtTime(e.start)}{e.location ? ` · ${e.location}` : ''}
         </p>
       </div>
       <div className="flex shrink-0 items-center gap-1.5">

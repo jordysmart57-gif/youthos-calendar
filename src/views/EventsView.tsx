@@ -45,7 +45,7 @@ function DraftModal({ title, text, onClose }: { title: string; text: string; onC
       />
       <div className="mt-3 flex items-center justify-between gap-2">
         <p className="text-[11px] font-medium text-stone-400">
-          Anything marked [TODO] still needs info — fill the clarity fields to remove them.
+          Lines marked "← add this before sending" need clarity info — tap the field on the event to fill them in.
         </p>
         <button
           onClick={copy}
@@ -120,7 +120,7 @@ function EventCard({ e, onSelect }: { e: MinistryEvent; onSelect: (id: string) =
           <div className="min-w-0">
             <p className="truncate text-base font-extrabold">{e.title}</p>
             <p className="mt-0.5 text-xs text-stone-500">
-              {fmtDate(e.start)} · {fmtTime(e.start)} · {e.location}
+              {fmtDate(e.start)} · {fmtTime(e.start)}{e.location ? ` · ${e.location}` : ''}
             </p>
           </div>
           <Badge tone={STATUS_META[e.status].chip}>{STATUS_META[e.status].label}</Badge>
@@ -263,10 +263,12 @@ function EventDetail({
           <Card>
             <SectionTitle>Details</SectionTitle>
             <dl className="space-y-2 text-sm">
-              <div className="flex justify-between gap-4">
-                <dt className="font-semibold text-stone-500">Location</dt>
-                <dd className="text-right font-bold">{e.location}</dd>
-              </div>
+              {e.location && (
+                <div className="flex justify-between gap-4">
+                  <dt className="font-semibold text-stone-500">Location</dt>
+                  <dd className="text-right font-bold">{e.location}</dd>
+                </div>
+              )}
               <div className="flex justify-between gap-4">
                 <dt className="font-semibold text-stone-500">Target group</dt>
                 <dd className="text-right font-bold">{e.targetGroup}</dd>

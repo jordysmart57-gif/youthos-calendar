@@ -228,7 +228,7 @@ export const CLARITY_HINTS: Record<keyof ClarityInfo, string> = {
   cost: 'e.g. $10 — covers lunch + gas. Scholarships available.',
   foodInfo: 'e.g. Burgers provided. Bring a snack to share.',
   forms: 'e.g. Waiver required — link in the parent email',
-  contactPerson: 'e.g. Jordan — (541) 555-0100',
+  contactPerson: 'e.g. Your name — (541) 000-0000',
   transportation: 'e.g. Church vans both ways / No bus — parents drive',
   packingList: 'e.g. Swimsuit, towel, sunscreen, water bottle',
 };
@@ -247,7 +247,7 @@ export function draftParentUpdate(e: MinistryEvent): string {
   lines.push(`📍 Where: ${e.location}`);
   const item = (key: keyof ClarityInfo, emoji: string, label: string) => {
     if (d[key]) lines.push(`${emoji} ${label}: ${d[key]}`);
-    else if (!e.clarity[key]) lines.push(`${emoji} ${label}: [TODO — fill in before sending]`);
+    else if (!e.clarity[key]) lines.push(`${emoji} ${label}: ← add this before sending`);
   };
   item('dropOffLocation', '🚗', 'Drop-off');
   item('pickUpTime', '🕐', 'Pick-up');
@@ -257,7 +257,7 @@ export function draftParentUpdate(e: MinistryEvent): string {
   item('transportation', '🚌', 'Getting there');
   item('packingList', '🎒', 'What to bring');
   lines.push('');
-  lines.push(`Questions? Reach out to ${d.contactPerson ?? '[your name + number]'} anytime.`);
+  if (d.contactPerson) lines.push(`Questions? Reach out to ${d.contactPerson} anytime.`);
   lines.push('');
   lines.push("We'd love to have your student there!");
   return lines.join('\n');
@@ -267,7 +267,7 @@ export function draftParentUpdate(e: MinistryEvent): string {
 export function draftLeaderBriefing(e: MinistryEvent): string {
   const lines: string[] = [];
   lines.push(`${e.title.toUpperCase()} — LEADER RUN SHEET`);
-  lines.push(`${fmtDateLong(e.start)} · ${fmtTime(e.start)} · ${e.location}`);
+  lines.push(`${fmtDateLong(e.start)} · ${fmtTime(e.start)}${e.location ? ` · ${e.location}` : ''}`);
   lines.push(`Who: ${e.targetGroup}`);
   if (e.capacity) lines.push(`Registered: ${e.registered}/${e.capacity}`);
   else if (e.registered > 0) lines.push(`Expecting: ${e.registered}`);

@@ -49,7 +49,7 @@ export default function EventForm({ initial, template, initialDate, onSave, onCl
       title: title.trim(),
       category,
       start: `${date}T${time || '19:00'}`,
-      location: location.trim() || 'TBD',
+      location: location.trim() || '',
       targetGroup: targetGroup.trim() || 'All students',
       status,
       parentFacing,
